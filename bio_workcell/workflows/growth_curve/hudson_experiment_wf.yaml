@@ -1,0 +1,48 @@
+metadata:
+  name: PCR - Workflow
+  author: Casey Stone, Rafael Vescovi
+  info: Initial PCR workflow for RPL workcell
+  version: 0.1
+
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
+
+modules:
+  - name: solo
+  - name: peeler
+  - name: sealer
+  - name: plateEx
+  - name: camera
+
+flowdef:
+    # STEP 1
+  - name: Mix Reactions
+    module: solo
+    command: run_protocol
+    args:
+      hso_contents: payload.hso_1
+      hso_num_lines: payload.hso_1_lines
+      hso_basename: payload.hso_1_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+    # STEP 2
+  - name: Mix Reactions
+    module: solo
+    command: run_protocol
+    args:
+      hso_contents: payload.hso_2
+      hso_num_lines: payload.hso_2_lines
+      hso_basename: payload.hso_2_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+    # STEP 3
+  - name: Mix Reactions
+    module: solo
+    command: run_protocol
+    args:
+      hso_contents: payload.hso_3
+      hso_num_lines: payload.hso_3_lines
+      hso_basename: payload.hso_3_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be

@@ -1,0 +1,51 @@
+metadata:
+  name: PCR - Workflow
+  author: Casey Stone, Rafael Vescovi
+  info: Initial PCR workflow for RPL workcell
+  version: 0.1
+
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
+
+modules:
+  - name: solo
+  - name: peeler
+  - name: sealer
+  - name: plateEx
+  - name: camera
+
+flowdef:
+  - name: Move tip bin from Stack4 to Solo Position3
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Stack4"
+      target: "Solo.Position3"
+      source_type: "stack"
+      target_type: "stack"
+      plate_type: "tip_box_lid_off"
+    checks: null
+    comment: Place plate in Solo Position4
+
+  - name: Move plate from Stack5 to Solo Position4
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Stack5"
+      target: "Solo.Position4"
+      source_type: "stack"
+      target_type: "stack"
+      plate_type: "96_well"
+    checks: null
+    comment: Place plate in Solo Position4
+
+  - name: Remove lid
+    module: plateCrane
+    command: remove_lid
+    args:
+      source: "Solo.Position4"
+      target: "LidNest2"
+      plate_type: "96_well"
+    checks: null
+    comment: Place plate lid on lid nest 2
+
+  

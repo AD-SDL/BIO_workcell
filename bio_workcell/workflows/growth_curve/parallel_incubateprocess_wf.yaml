@@ -1,0 +1,108 @@
+metadata:
+  name: PCR - Workflow
+  author: Casey Stone, Rafael Vescovi
+  info: Initial PCR workflow for RPL workcell
+  version: 0.1
+
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
+
+modules:
+  - name: solo
+  - name: peeler
+  - name: sealer
+  - name: plateEx
+  - name: camera
+
+flowdef:
+  - name: Open Hidex
+    module: hidex
+    command: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from Solo Position4 to Hidex Nest
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Solo.Position4"
+      target: "HidexNest2"
+      source_type: "module"
+      target_type: "module"      
+      height_offset: "700"
+    checks: null
+    comment: Place plate to Hidex Nest
+
+  - name: run Hidex
+    module: hidex
+    command: run_assay
+    args: 
+      assay_name: "Campaign2_wei_cs"
+    checks: null
+    comment: Run protocol at hidex
+
+  - name: Open Hidex
+    module: hidex
+    command: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from HidexNest to Sealer
+    module: plateCrane
+    command: transfer
+    args:
+      source: "HidexNest2"
+      target: "SealerNest"
+      source_type: "module"
+      target_type: "module"  
+      height_offset: "650"
+    checks: null
+    comment: Place plate to Sealer
+
+  - name: Close Hidex
+    module: hidex
+    command: close
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Close Hidex Gate
+
+  - name: Seal PCR plate
+    module: sealer
+    command: seal
+    args:
+      time: payload:seal.time
+      temperature: 175
+    checks: null
+    comment: nullassay_name
+
+  - name: Move plate from Sealer to Liconic
+    module: plateCrane
+    command: transfer
+    args:
+      source: "SealerNest"
+      target: "Liconic.Nest"
+      source_type: "module"
+      target_type: "stack"   
+    checks: null
+    comment: Place plate onto Liconic
+
+  - name: Load Liconic
+    module: liconic
+    command: load_plate
+    args: 
+      stacker: payload.stacker
+      slot: payload.slot
+    checks: null
+    comment: Stage pcr plates
+
+  - name: Start shaker at set speed
+    module: liconic
+    command: begin_shake
+    args: 
+      shaker_speed: payload.shaker_speed
+    checks: null
+    comment: Stage pcr plates
