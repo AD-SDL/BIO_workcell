@@ -1,0 +1,24 @@
+metadata:
+  name: PCR - Workflow
+  author: Alp Demirtas    
+  info: Initial PCR workflow for RPL workcell
+  version: 0.1
+
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
+
+modules:
+  - name: solo
+  - name: peeler
+  - name: sealer
+  - name: plateEx
+  - name: camera
+
+flowdef:
+  - name: Seal PCR plate
+    module: sealer
+    command: seal
+    args:
+      time: 3.0
+      temperature: 175
+    checks: null
+    comment: nullassay_name
