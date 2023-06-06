@@ -5,7 +5,7 @@ from pathlib import Path
 from argparse import ArgumentParser
 import time
 from rpl_wei.wei_workcell_base import WEI
-from .tools.c2_flow import c2_flow
+#from .tools.c2_flow import c2_flow
 from pathlib import Path
 
 from workflows.growth_curve.hso_functions import package_hso
@@ -19,7 +19,7 @@ TARGETED_PROCESS_TIME_MINUTES = 60
 TARGETED_PROCESS_TIME_SECONDS = TARGETED_PROCESS_TIME_MINUTES * 60
 
 def solodolo():
-    wf_path = Path('/home/rpl/workspace/rpl_workcell/bio_workcell/workflows/growth_curve/hudson_experiment_wf.yaml')
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/hudson_experiment_wf.yaml')
 
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
@@ -69,7 +69,7 @@ def solodolo():
     # #loop here
 
 def solosetup():
-    wf_path = Path('/home/rpl/workspace/rpl_workcell/bio_workcell/workflows/growth_curve/hudson_setup_wf.yaml')
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/hudson_setup_wf.yaml')
 
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
@@ -119,7 +119,7 @@ def solosetup():
     # #loop here
 
 def endprocess():
-    wf_path = Path('/home/rpl/workspace/rpl_workcell/bio_workcell/workflows/growth_curve/parallel_endprocess_wf.yaml')
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/parallel_endprocess_wf.yaml')
 
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
@@ -159,7 +159,7 @@ def endprocess():
     print(run_info)
 
 def incubateprocesses():
-    wf_path = Path('/home/rpl/workspace/rpl_workcell/bio_workcell/workflows/growth_curve/parallel_incubateprocess_wf.yaml')
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/parallel_incubateprocess_wf.yaml')
 
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
@@ -202,6 +202,8 @@ if __name__ == "__main__":
     startTime = round(time.time())
     liconicStartTime = 0.0
     solosetup()
+    solodolo()
+    
     previousProcessTime = 0.0
     for i in range (0, EXPERIMENT_ITERATIONS + INCUBATION_TIME_MINUTES/TARGETED_PROCESS_TIME_MINUTES):
         if(i < EXPERIMENT_ITERATIONS):
@@ -216,7 +218,7 @@ if __name__ == "__main__":
             endprocess()
         time.sleep(TARGETED_PROCESS_TIME_SECONDS - round(time.time) + previousProcessTime)
         previousProcessTime = round(time.time)
-
+        
         
 
         
