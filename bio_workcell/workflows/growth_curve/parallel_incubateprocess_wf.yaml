@@ -22,11 +22,11 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from Solo Position4 to Hidex Nest
+  - name: Move plate from Lid Nest 1 to Hidex Nest
     module: plateCrane
     command: transfer
     args:
-      source: "Solo.Position4"
+      source: "LidNest1"
       target: "HidexNest2"
       source_type: "module"
       target_type: "module"      
