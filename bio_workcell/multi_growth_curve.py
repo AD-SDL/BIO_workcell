@@ -35,7 +35,6 @@ def tZero():
 
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
-
     payload={
         'temp': 37.0, 
         'humidity': 95.0,
