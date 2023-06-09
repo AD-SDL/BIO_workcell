@@ -1,0 +1,159 @@
+metadata:
+  name: Growth Curve - Workflow
+  author: Alp Demirtas, Abe Stroka
+  info: Initial PCR workflow for RPL workcell
+  version: 0.1
+
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
+
+modules:
+  - name: solo
+  - name: peeler
+  - name: sealer
+  - name: plateEx
+  - name: camera
+
+flowdef:
+# 96 Well Plate from Stack 3 to Solo Position 4  
+  - name: 96 well plate from Stack 3 to Solo Position 4
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Stack3"
+      target: "Solo.Position4"
+      source_type: "stack"
+      target_type: "stack"
+      plate_type: "96_well"
+    checks: null
+    comment: 96 well plate from Stack 3 to Solo Position 4
+
+# Remove Lid
+  - name: Remove lid
+    module: plateCrane
+    command: remove_lid
+    args:
+      source: "Solo.Position4"
+      target: "LidNest2"
+      plate_type: "96_well"
+    checks: null
+    comment: Place plate lid on lid nest 2
+
+# Tip box from Stack 4 to Solo Position 3
+  - name: Tip box from Stack 4 to Solo Position 3
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Stack4"
+      target: "Solo.Position3"
+      source_type: "stack"
+      target_type: "stack"
+      plate_type: "tip_box_lid_off"
+    checks: null
+    comment: Tip box from Stack 4 to Solo Position 3
+
+    # STEP 2
+  - name: Mix Reactions
+    module: solo
+    command: run_protocol
+    args:
+      hso_contents: payload.hso_2
+      hso_num_lines: payload.hso_2_lines
+      hso_basename: payload.hso_2_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+# Move to Sealer
+  - name: Move 96 well plate from Solo Position 4 to Sealer
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Solo.Position4"
+      target: "SealerNest"
+      source_type: "stack"
+      target_type: "module"  
+      height_offset: "650"
+    checks: null
+    comment: Place plate to Sealer
+
+# Seal
+  - name: Seal PCR plate
+    module: sealer
+    command: seal
+    args:
+      time: 3.0
+      temperature: 175
+    checks: null
+    comment: nullassay_name
+
+# Move to Liconic
+  - name: Move plate from Sealer to Liconic
+    module: plateCrane
+    command: transfer
+    args:
+      source: "SealerNest"
+      target: "Liconic.Nest"
+      source_type: "module"
+      target_type: "stack"   
+    checks: null
+    comment: Place plate onto Liconic
+
+# Incubate for 10 seconds
+  - name: Load Liconic
+    module: liconic
+    command: load_plate
+    args: 
+      stacker: 1
+      slot: 1
+    checks: null
+    comment: Stage pcr plates
+
+  - name: Start shaker at set speed
+    module: liconic
+    command: begin_shake
+    args: 
+      shaker_speed: 30.0
+    checks: null
+    comment: Stage pcr plates
+
+  - name: Unload Liconic
+    module: liconic
+    command: unload_plate
+    args: 
+      stacker: 1
+      slot: 1
+    checks: null
+    comment: Stage pcr plates
+
+# Move to Peeler
+  - name: Move plate from Liconic to Peeler
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Liconic.Nest"
+      target: "PeelerNest"
+      source_type: "stack"
+      target_type: "module"   
+    checks: null
+    comment: Place plate onto PeelerNest
+
+#Peel
+  - name: Peel
+    module: peeler
+    command: peel
+    args:
+      test: null
+    checks: null
+    comment: null
+
+# Move to Stack 1
+  - name: Move Plate from Peeler to Stack 1
+    module: plateCrane
+    command: transfer
+    args: 
+      source: "PeelerNest"
+      target: "Stack1"
+      source_type: "module"
+      target_type: "stack"
+      height_offset: "700"      
+    checks: null
+    comment: Place plate onto Stack 1

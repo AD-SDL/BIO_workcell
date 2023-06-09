@@ -4,7 +4,7 @@ metadata:
   info: Initial Tests for the Biometra at BIO.
   version: 0.1
 
-workcell: /home/rpl/workspace/rpl_workcell/bio_workcell/bio_workcell.yaml
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
 
 modules:
   - name: biometra

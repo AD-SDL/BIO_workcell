@@ -1,5 +1,3 @@
-#!/usr/bin/env python3
-
 import logging
 from pathlib import Path
 from argparse import ArgumentParser
@@ -9,13 +7,12 @@ from pathlib import Path
 from datetime import datetime
 from workflows.growth_curve.hso_functions import package_hso
 from workflows.growth_curve import solo_step1, solo_step2, solo_step3
-import time
 
 def main():
-    wf_path_1 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/create_plate_T0.yaml')
-    wf_path_2 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/read_plate_T12.yaml')
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/alp_test_wf.yaml')
+    # wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/growth_curve_wf.yaml')
 
-    wei_client = WEI(wf_config = wf_path_1.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
+    wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
     payload={
         'temp': 37.0, 
@@ -28,7 +25,6 @@ def main():
         "culture_dil_column": 1, # int of dilution column for 1:10 culture dilutions. Ex. 1, 2, 3, etc.
         "media_start_column": 1,  # int of column to draw media from (requires 2 columns, 1 means columns 1 and 2) Ex. 1, 3, 5, etc.
         "treatment_dil_half": 1,  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2. 
-        "tip_box_position" : 3,
         }
 
     # from somewhere import create_hso? or directly the solo script
@@ -49,47 +45,15 @@ def main():
     payload['hso_3_lines'] = hso_3_lines
     payload['hso_3_basename'] = hso_3_basename
 
-    # #run Growth Create Plate
-    run_info = wei_client.run_workflow(payload=payload)
+    run_info = wei_client.run_workflow(payload= payload)
     print(run_info)
-    # test = run_info["hist"]["run Hidex"]["step_response"]
-    # test = test.replace('\\', '/')
-    # test = test.replace("C:/", "/C/")
-    # flow_title = Path(test) #Path(run_info["hist"]["run_assay"]["step_response"])
-    # fname = flow_title.name
-    # flow_title = flow_title.parents[0]
-    # c2_flow("hidex_test", str(fname.split('.')[0]), "test", flow_title, fname)
+    test = run_info["hist"]["run Hidex"]["step_response"]
+    test = test.replace('\\', '/')
+    test = test.replace("C:/", "/C/")
+    flow_title = Path(test) #Path(run_info["hist"]["run_assay"]["step_response"])
+    fname = flow_title.name
+    flow_title = flow_title.parents[0]
+    c2_flow("alp_test", str(fname.split('.')[0]), "test", flow_title, fname)
 
-    # wait while incubating
-    time.sleep(43200)
-
-    # # read plate
-    wei_client = WEI(wf_config = wf_path_2.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
-    run_info = wei_client.run_workflow(payload=payload)
-    print(run_info)
-    # test = run_info["hist"]["run Hidex"]["step_response"]
-    # test = test.replace('\\', '/')
-    # test = test.replace("C:/", "/C/")
-    # flow_title = Path(test) #Path(run_info["hist"]["run_assay"]["step_response"])
-    # fname = flow_title.name
-    # flow_title = flow_title.parents[0]
-    # c2_flow("hidex_test", str(fname.split('.')[0]), "test", flow_title, fname)
-
-
-
-    # un_workflow(payload=payload)
-    #     print(run_info)
-    # orkflow(payload=payload)
-    #     print(run_info)
-    # # store plate_n, payload, and time into a db
-    # # publish flow
-    # # loop here
-    # ###################
-    # #check if any plate on db has 12h
-    # #create new payload
-    # #run measure_plate
-    # #publish again
-    # #loop here
-    
 if __name__ == "__main__":
     main()

@@ -55,12 +55,12 @@ modules:
     model: Hidex
     config:
       tcp_address: "hudson01.cels.anl.gov"
-      tcp_port: "5556"
+      tcp_port: "2000"
     positions:
       default: []
 
   - name: solo
-    type: wei_tcp_node
+    type: wei_zmq_node
     model: Solo
     config:
       tcp_address: "hudson01.cels.anl.gov"
