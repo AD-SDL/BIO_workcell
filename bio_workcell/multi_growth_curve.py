@@ -29,7 +29,10 @@ def two():
     EXPERIMENT_ITERATIONS = 2
     while(iterations < EXPERIMENT_ITERATIONS or len(times) == 0):
         if(iterations < EXPERIMENT_ITERATIONS):
-            setup()   
+            if(iterations % 2 == 0):
+                setup(True)
+            else: 
+                setup(False)  
             tZero()
             times.append(round(time.time))
             iterations = iterations + 1
@@ -54,13 +57,13 @@ def six():
             tZero()
             times.append(round(time.time))
             iterations = iterations + 1
-            hidex_refresh_time = round(time.time)
+            #hidex_refresh_time = round(time.time)
         if(round(time.time) - times[0] > INCUBATION_TIME_SECONDS):
             tOne()
             times.pop(0)
-            hidex_refresh_time = round(time.time)
-        if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
-            refreshHidex()
+            #hidex_refresh_time = round(time.time)
+        #if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
+            #refreshHidex()
 
 def setup(tip_box_and_growth_media):
     if(tip_box_and_growth_media):
