@@ -1,0 +1,31 @@
+metadata:
+  name: PCR - Workflow
+  author: Alp Demirtas
+  info: Initial PCR workflow for RPL workcell
+  version: 0.1
+
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
+
+modules:
+  - name: solo
+  - name: peeler
+  - name: sealer
+  - name: plateEx
+  - name: camera
+
+flowdef:
+  - name: Open Hidex
+    module: hidex
+    command: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Close Hidex
+    module: hidex
+    command: close
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Close Hidex Gate

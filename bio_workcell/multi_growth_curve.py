@@ -17,10 +17,65 @@ INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
 INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
 TARGETED_PROCESS_TIME_MINUTES = 60
 TARGETED_PROCESS_TIME_SECONDS = TARGETED_PROCESS_TIME_MINUTES * 60
+HIDEX_IDLE_THRESHOLD_SECONDS = 3600
 times = []
 iterations = 0
 
 def main():
+    six() 
+
+def two():
+    hidex_refresh_time = round(time.time)
+    EXPERIMENT_ITERATIONS = 2
+    while(iterations < EXPERIMENT_ITERATIONS or len(times) == 0):
+        if(iterations < EXPERIMENT_ITERATIONS):
+            setup()   
+            tZero()
+            times.append(round(time.time))
+            iterations = iterations + 1
+            hidex_refresh_time = round(time.time)
+        if(round(time.time) - times[0] > INCUBATION_TIME_SECONDS):
+            tOne()
+            times.pop(0)
+            hidex_refresh_time = round(time.time)
+        if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
+            refreshHidex()
+
+def six():
+    EXPERIMENT_ITERATIONS = 6
+    hidex_refresh_time = round(time.time)
+    EXPERIMENT_ITERATIONS = 2
+    while(iterations < EXPERIMENT_ITERATIONS or len(times) == 0):
+        if(iterations < EXPERIMENT_ITERATIONS):
+            if(iterations % 2 == 0):
+                setup(True)
+            else: 
+                setup(False)
+            tZero()
+            times.append(round(time.time))
+            iterations = iterations + 1
+            hidex_refresh_time = round(time.time)
+        if(round(time.time) - times[0] > INCUBATION_TIME_SECONDS):
+            tOne()
+            times.pop(0)
+            hidex_refresh_time = round(time.time)
+        if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
+            refreshHidex()
+
+def setup(tip_box_and_growth_media):
+    if(tip_box_and_growth_media):
+        wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/complete_hudson_setup.yaml') #Set Up Both Tip Box and Growth media
+        wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
+        run_info = wei_client.run_workflow(payload=None)
+        print(run_info)
+
+    else:
+        wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/streamlined_hudson_setup.yaml') #Just Set up Growth Well
+        wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
+        run_info = wei_client.run_workflow(payload=None)
+        print(run_info)
+
+def base():
     while(iterations < EXPERIMENT_ITERATIONS or len(times) == 0):
         if(iterations < EXPERIMENT_ITERATIONS):   
             tZero()
@@ -29,9 +84,17 @@ def main():
         if(round(time.time) - times[0] > INCUBATION_TIME_SECONDS):
             tOne()
             times.pop(0)
+        
+def refreshHidex():
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/open_close_hidex.yaml') #Open_Close_Hidex File Path
+
+    wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
+
+    run_info = wei_client.run_workflow(payload=None)
+    print(run_info)
 
 def tZero():
-    wf_path = Path('/home/rpl/workspace/rpl_workcell/bio_workcell/workflows/growth_curve/growth_curve_wf.yaml') #T0 File Path
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/create_plate_T0.yaml') 
 
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
@@ -80,8 +143,7 @@ def tZero():
     # #loop here
 
 def tOne():
-    wf_path = Path('/home/rpl/workspace/rpl_workcell/bio_workcell/workflows/growth_curve/growth_curve_wf.yaml') #T1 File Path
-
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/read_plate_T12.yaml')
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
 
