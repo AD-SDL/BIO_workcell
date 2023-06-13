@@ -36,13 +36,13 @@ def two():
             tZero()
             times.append(round(time.time))
             iterations = iterations + 1
-            hidex_refresh_time = round(time.time)
+            #hidex_refresh_time = round(time.time)
         if(round(time.time) - times[0] > INCUBATION_TIME_SECONDS):
             tOne()
             times.pop(0)
-            hidex_refresh_time = round(time.time)
-        if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
-            refreshHidex()
+            #hidex_refresh_time = round(time.time)
+        #if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
+            #refreshHidex()
 
 def six():
     EXPERIMENT_ITERATIONS = 6
