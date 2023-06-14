@@ -26,13 +26,33 @@ flowdef:
     checks: null
     comment: Place plate in Solo Position4
 
-  - name: Move deep well plate from Stack3 to Solo Position6
+  - name: Move deep well plate from Stack3 to Peeler
     module: plateCrane
     command: transfer
     args:
       source: "Stack3"
-      target: "Solo.Position6"
+      target: "PeelerNest"
       source_type: "stack"
+      target_type: "module"
+      plate_type: "nest_96_wellplate_2ml_deep"
+    checks: null
+    comment: Place plate in Solo Position4
+
+  - name: Peel
+    module: peeler
+    command: peel
+    args:
+      test: null
+    checks: null
+    comment: null
+  
+  - name: Move deep well plate from Peeler to Solo Position6
+    module: plateCrane
+    command: transfer
+    args:
+      source: "PeelerNest"
+      target: "Solo.Position6"
+      source_type: "module"
       target_type: "stack"
       plate_type: "nest_96_wellplate_2ml_deep"
     checks: null

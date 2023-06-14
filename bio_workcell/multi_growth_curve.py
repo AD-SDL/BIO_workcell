@@ -20,6 +20,7 @@ TARGETED_PROCESS_TIME_SECONDS = TARGETED_PROCESS_TIME_MINUTES * 60
 HIDEX_IDLE_THRESHOLD_SECONDS = 3600
 times = []
 iterations = 0
+removals = 0
 
 def main():
     six() 
@@ -33,13 +34,18 @@ def two():
                 setup(True)
             else: 
                 setup(False)  
-            tZero()
+            liconic_id = iterations + 1
+            tZero(liconic_id)
             times.append(round(time.time))
             iterations = iterations + 1
+            if(iterations % 2 == 0):
+                dispose()
             #hidex_refresh_time = round(time.time)
         if(round(time.time) - times[0] > INCUBATION_TIME_SECONDS):
-            tOne()
+            liconic_id = removals + 1
+            tOne(liconic_id)
             times.pop(0)
+            removals = removals + 1
             #hidex_refresh_time = round(time.time)
         #if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
             #refreshHidex()
@@ -54,26 +60,37 @@ def six():
                 setup(True)
             else: 
                 setup(False)
-            tZero()
+            liconic_id = iterations + 1
+            tZero(liconic_id)
             times.append(round(time.time))
             iterations = iterations + 1
+            if(iterations % 2 == 0):
+                dispose()
             #hidex_refresh_time = round(time.time)
         if(round(time.time) - times[0] > INCUBATION_TIME_SECONDS):
-            tOne()
+            liconic_id = removals + 1
+            tOne(liconic_id)
             times.pop(0)
+            removals = removals + 1
             #hidex_refresh_time = round(time.time)
         #if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
             #refreshHidex()
 
+def dispose():
+    wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/dispose_box_plate.yaml')
+    wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
+    run_info = wei_client.run_workflow(payload=None)
+    print(run_info)
+
 def setup(tip_box_and_growth_media):
     if(tip_box_and_growth_media):
-        wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/complete_hudson_setup.yaml') #Set Up Both Tip Box and Growth media
+        wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/complete_hudson_setup.yaml') 
         wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
         run_info = wei_client.run_workflow(payload=None)
         print(run_info)
 
     else:
-        wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/streamlined_hudson_setup.yaml') #Just Set up Growth Well
+        wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/streamlined_hudson_setup.yaml') 
         wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
         run_info = wei_client.run_workflow(payload=None)
         print(run_info)
@@ -96,10 +113,11 @@ def refreshHidex():
     run_info = wei_client.run_workflow(payload=None)
     print(run_info)
 
-def tZero():
+def tZero(liconic_plate_id):
     wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/create_plate_T0.yaml') 
 
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
+    plate_id = '', liconic_plate_id
 
     payload={
         'temp': 37.0, 
@@ -112,6 +130,7 @@ def tZero():
         "culture_dil_column": 1, # int of dilution column for 1:10 culture dilutions. Ex. 1, 2, 3, etc.
         "media_start_column": 1,  # int of column to draw media from (requires 2 columns, 1 means columns 1 and 2) Ex. 1, 3, 5, etc.
         "treatment_dil_half": 1,  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2. 
+        "incubation_plate_id" : plate_id,        
         }
 
     # from somewhere import create_hso? or directly the solo script
@@ -145,10 +164,11 @@ def tZero():
     # #publish again
     # #loop here
 
-def tOne():
+def tOne(liconic_plate_id):
     wf_path = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/read_plate_T12.yaml')
     wei_client = WEI(wf_config = wf_path.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
 
+    plate_id = '', liconic_plate_id
 
     payload={
         'temp': 37.0, 
@@ -160,7 +180,8 @@ def tOne():
         "culture_column": 1,  # int of cell culture column. Ex. 1, 2, 3, etc.
         "culture_dil_column": 1, # int of dilution column for 1:10 culture dilutions. Ex. 1, 2, 3, etc.
         "media_start_column": 1,  # int of column to draw media from (requires 2 columns, 1 means columns 1 and 2) Ex. 1, 3, 5, etc.
-        "treatment_dil_half": 1,  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2. 
+        "treatment_dil_half": 1,  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2.
+        "incubation_plate_id" : plate_id,
         }
 
     # from somewhere import create_hso? or directly the solo script
