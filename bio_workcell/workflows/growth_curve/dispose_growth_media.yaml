@@ -1,0 +1,27 @@
+metadata:
+  name: Growth Curve - Workflow
+  author: Casey Stone, Rafael Vescovi
+  info: Initial PCR workflow for RPL workcell
+  version: 0.1
+
+workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
+
+modules:
+  - name: solo
+  - name: peeler
+  - name: sealer
+  - name: plateEx
+  - name: camera
+
+flowdef:
+  - name: Move Growth Media Plate from Solo Position2 to Stack 2
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Solo.Position2"
+      target: "Stack2"
+      source_type: "stack"
+      target_type: "stack"
+      plate_type: "nest_96_wellplate_2ml_deep"
+    checks: null
+    comment: Place plate in Solo Position4

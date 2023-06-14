@@ -26,12 +26,12 @@ flowdef:
     checks: null
     comment: Place plate in Solo Position4
 
-  - name: Move deep well plate from Solo Position6 to Stack 2
+  - name: Move deep well plate from Solo Position6 to Disposal Location
     module: plateCrane
     command: transfer
     args:
       source: "Solo.Position6"
-      target: "Stack2"
+      target: payload.disposal_location
       source_type: "stack"
       target_type: "stack"
       plate_type: "nest_96_wellplate_2ml_deep"
