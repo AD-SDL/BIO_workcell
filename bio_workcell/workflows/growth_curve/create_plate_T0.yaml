@@ -1,6 +1,6 @@
 metadata:
   name: Multi-Growth Assay Run Workflow
-  author: Alp Demirtas
+  author: Rafael Vescovi, Casey Stone, Abraham Stroka, Alp Demirtas
   info: Growth Assay Workflow and all of its individual components called from the multi_growth_curve.py file
   version: 1.3
 
