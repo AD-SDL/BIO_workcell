@@ -1,8 +1,8 @@
 metadata:
-  name: PCR - Workflow
-  author: Casey Stone, Rafael Vescovi
-  info: Initial PCR workflow for RPL workcell
-  version: 0.1
+  name: Multi-Growth Assay Run Workflow
+  author: Alp Demirtas
+  info: Growth Assay Workflow and all of its individual components called from the multi_growth_curve.py file
+  version: 1.3
 
 workcell: /home/rpl/workspace/BIO_workcell/bio_workcell/bio_workcell.yaml
 
