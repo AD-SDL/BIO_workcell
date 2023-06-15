@@ -78,12 +78,12 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from HidexNest to Stack1
+  - name: Move plate from HidexNest to Stack2
     module: plateCrane
     command: transfer
     args:
       source: "HidexNest2"
-      target: "Stack1"
+      target: "Stack2"
       source_type: "module"
       target_type: "stack"   
       height_offset: "650"

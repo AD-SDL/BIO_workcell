@@ -26,6 +26,18 @@ flowdef:
     checks: null
     comment: Place plate in Solo Position4
 
+  - name: Move tip bin from Solo Position 3 to Solo Position3
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Solo.Position3"
+      target: "Solo.Position3"
+      source_type: "stack"
+      target_type: "stack"
+      plate_type: "tip_box_lid_off"
+    checks: null
+    comment: Place plate in Solo Position4
+
   - name: Move deep well plate from Stack3 to Peeler
     module: plateCrane
     command: transfer
@@ -75,10 +87,10 @@ flowdef:
     command: remove_lid
     args:
       source: "Solo.Position4"
-      target: "Stack2"
+      target: "Stack1"
       plate_type: "96_well"
     checks: null
-    comment: Place plate lid on lid nest 2
+    comment: Place plate lid on Stack 1
   
   - name: Refill Tips
     module: solo
