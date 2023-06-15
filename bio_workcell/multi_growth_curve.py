@@ -5,17 +5,16 @@ from argparse import ArgumentParser
 import time
 from tools.c2_flow import c2_flow
 from pathlib import Path
-#from rpl_wei.wei_workcell_base import WEI
 from workflows.growth_curve.hso_functions import package_hso
 from workflows.growth_curve import solo_step1, solo_step2, solo_step3
 from rpl_wei import Experiment
+
+#from rpl_wei.wei_workcell_base import WEI
 
 EXPERIMENT_ITERATIONS = 2
 INCUBATION_TIME_HOURS = 0.5
 INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
 INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
-TARGETED_PROCESS_TIME_MINUTES = 60
-TARGETED_PROCESS_TIME_SECONDS = TARGETED_PROCESS_TIME_MINUTES * 60
 HIDEX_IDLE_THRESHOLD_SECONDS = 3600
 
 COMPLETE_HUDSON_SETUP_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/complete_hudson_setup.yaml'
@@ -30,9 +29,6 @@ DISPOSE_GROWTH_MEDIA_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/
 
 HIDEX_OPEN_CLOSE_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/open_close_hidex.yaml'
 
-incubation_start_times = []
-
-
 exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
 exp.register_exp() 
 exp.events.log_local_compute("package_hso")
@@ -40,90 +36,27 @@ exp.events.log_local_compute("package_hso")
 def main(): 
     iterations = 0
     removals = 0
+    incubation_start_times = []
+
     while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
         if(iterations < EXPERIMENT_ITERATIONS):
             setup(iterations)
             liconic_id = iterations + 1
             T0_Reading(liconic_id)
-            incubation_start_times.append(round(time.time))
+            incubation_start_times.append(round(time.time()))
             iterations = iterations + 1
             if(iterations % 2 == 0):
                 dispose(iterations)
-        if(round(time.time) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+        if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
             liconic_id = removals + 1
             T12_Reading(liconic_id)
             incubation_start_times.pop(0)
             removals = removals + 1
 
 
-def two():
-    hidex_refresh_time = round(time.time)
-    EXPERIMENT_ITERATIONS = 2
-    while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
-        if(iterations < EXPERIMENT_ITERATIONS):
-            setup(iterations)
-            liconic_id = iterations + 1
-            T0_Reading(liconic_id)
-            incubation_start_times.append(round(time.time))
-            iterations = iterations + 1
-            if(iterations % 2 == 0):
-                dispose()
-            #hidex_refresh_time = round(time.time)
-        if(round(time.time) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
-            liconic_id = removals + 1
-            T12_Reading(liconic_id)
-            incubation_start_times.pop(0)
-            removals = removals + 1
-            #hidex_refresh_time = round(time.time)
-        #if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
-            #refreshHidex()
-
-def six():
-    EXPERIMENT_ITERATIONS = 6
-    hidex_refresh_time = round(time.time)
-    EXPERIMENT_ITERATIONS = 2
-    while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
-        if(iterations < EXPERIMENT_ITERATIONS):
-            setup(iterations)
-            liconic_id = iterations + 1
-            T0_Reading(liconic_id)
-            incubation_start_times.append(round(time.time))
-            iterations = iterations + 1
-            if(iterations % 2 == 0):
-                dispose()
-            #hidex_refresh_time = round(time.time)
-        if(round(time.time) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
-            liconic_id = removals + 1
-            T12_Reading(liconic_id)
-            incubation_start_times.pop(0)
-            removals = removals + 1
-            #hidex_refresh_time = round(time.time)
-        #if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
-            #refreshHidex()
-
-def twelve():
-    while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
-        if(iterations < EXPERIMENT_ITERATIONS):
-            setup(iterations)
-            liconic_id = iterations + 1
-            T0_Reading(liconic_id)
-            incubation_start_times.append(round(time.time))
-            iterations = iterations + 1
-            if(iterations % 2 == 0):
-                dispose(iterations)
-            #hidex_refresh_time = round(time.time)
-        if(round(time.time) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
-            liconic_id = removals + 1
-            T12_Reading(liconic_id)
-            incubation_start_times.pop(0)
-            removals = removals + 1
-            #hidex_refresh_time = round(time.time)
-        #if(round(time.time) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
-            #refreshHidex()
-    
-def dispose(iterations):
+def dispose(iteration_number_after_increment):
     disposal_index = "Stack2"
-    stack_type = iterations/2
+    stack_type = iteration_number_after_increment/2
     if(stack_type <= 2):
         disposal_index = "LidNest", stack_type
     if(stack_type == 4):
@@ -135,31 +68,22 @@ def dispose(iterations):
     if(stack_type % 3 == 0):
         run_WEI(DISPOSE_GROWTH_MEDIA_FILE_PATH, None, False)
 
-def setup(iterations):
-    if(iterations % 2 == 0):
+def setup(iteration_number):
+    if(iteration_number % 2 == 0):
         complete_payload={
-                'tip_box_position': 3    
+                'tip_box_position': 3,
             }
         run_WEI(COMPLETE_HUDSON_SETUP_FILE_PATH, complete_payload, False)
-        if(iterations % 6 == 0):
-            LidNest_index = 3 - iterations/6
+        if(iteration_number % 6 == 0):
+            LidNest_index = 3 - iteration_number/6
+            plateCrane_readable_index = "LidNest", LidNest_index
             payload={
-                'lidnest_index':  LidNest_index,
-                'tip_box_position': 3    
+                'lidnest_index':  plateCrane_readable_index,
+                'tip_box_position': 3,  
             }
             run_WEI(SETUP_GROWTH_MEDIA_FILE_PATH, payload, False)
     else: 
         run_WEI(STREAMLINED_HUDSON_SETUP_FILE_PATH, None, False)
-
-def base():
-    while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
-        if(iterations < EXPERIMENT_ITERATIONS):   
-            T0_Reading()
-            incubation_start_times.append(round(time.time))
-            iterations = iterations + 1
-        if(round(time.time) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
-            T12_Reading()
-            incubation_start_times.pop(0)
         
 def refreshHidex():
     run_WEI(HIDEX_OPEN_CLOSE_FILE_PATH, None, False)
@@ -240,16 +164,6 @@ def T12_Reading(liconic_plate_id):
     # #run Growth Create Plate
     run_WEI(READ_PLATE_T12_FILE_PATH, payload, True)
 
-    # # store plate_n, payload, and time into a db
-    # # publish flow
-    # # loop here
-    # ###################
-    # #check if any plate on db has 12h
-    # #create new payload
-    # #run measure_plate
-    # #publish again
-    # #loop here
-
 def run_WEI(file_location, payload_class, Hidex_Used):
     flow_info = exp.run_job(Path(file_location).resolve(), payload=payload_class, simulate=False)
 
@@ -277,4 +191,97 @@ if __name__ == "__main__":
 
 #!/usr/bin/env python3
 
+
+
+# Previous Functions/Workflows
+
+# def two():
+#     iterations = 0
+#     removals = 0
+#     incubation_start_times = []
+
+#     hidex_refresh_time = round(time.time())
+#     EXPERIMENT_ITERATIONS = 2
+#     while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
+#         if(iterations < EXPERIMENT_ITERATIONS):
+#             setup(iterations)
+#             liconic_id = iterations + 1
+#             T0_Reading(liconic_id)
+#             incubation_start_times.append(round(time.time()))
+#             iterations = iterations + 1
+#             if(iterations % 2 == 0):
+#                 dispose()
+#             #hidex_refresh_time = round(time.time())
+#         if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+#             liconic_id = removals + 1
+#             T12_Reading(liconic_id)
+#             incubation_start_times.pop(0)
+#             removals = removals + 1
+#             #hidex_refresh_time = round(time.time())
+#         #if(round(time.time()) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
+#             #refreshHidex()
+
+# def six():
+#     iterations = 0
+#     removals = 0
+#     incubation_start_times = []
+
+#     EXPERIMENT_ITERATIONS = 6
+#     hidex_refresh_time = round(time.time())
+#     EXPERIMENT_ITERATIONS = 2
+#     while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
+#         if(iterations < EXPERIMENT_ITERATIONS):
+#             setup(iterations)
+#             liconic_id = iterations + 1
+#             T0_Reading(liconic_id)
+#             incubation_start_times.append(round(time.time()))
+#             iterations = iterations + 1
+#             if(iterations % 2 == 0):
+#                 dispose()
+#             #hidex_refresh_time = round(time.time())
+#         if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+#             liconic_id = removals + 1
+#             T12_Reading(liconic_id)
+#             incubation_start_times.pop(0)
+#             removals = removals + 1
+#             #hidex_refresh_time = round(time.time())
+#         #if(round(time.time()) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
+#             #refreshHidex()
+
+# def twelve():
+#     iterations = 0
+#     removals = 0
+#     incubation_start_times = []
+
+#     while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
+#         if(iterations < EXPERIMENT_ITERATIONS):
+#             setup(iterations)
+#             liconic_id = iterations + 1
+#             T0_Reading(liconic_id)
+#             incubation_start_times.append(round(time.time()))
+#             iterations = iterations + 1
+#             if(iterations % 2 == 0):
+#                 dispose(iterations)
+#             #hidex_refresh_time = round(time.time())
+#         if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+#             liconic_id = removals + 1
+#             T12_Reading(liconic_id)
+#             incubation_start_times.pop(0)
+#             removals = removals + 1
+#             #hidex_refresh_time = round(time.time())
+#         #if(round(time.time()) - hidex_refresh_time < (HIDEX_IDLE_THRESHOLD_SECONDS - 20*60)):
+#             #refreshHidex()
+
+# def base():
+#     iterations = 0
+#     removals = 0
+#     incubation_start_times = []
+#     while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
+#         if(iterations < EXPERIMENT_ITERATIONS):   
+#             T0_Reading()
+#             incubation_start_times.append(round(time.time()))
+#             iterations = iterations + 1
+#         if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+#             T12_Reading()
+#             incubation_start_times.pop(0)
 
