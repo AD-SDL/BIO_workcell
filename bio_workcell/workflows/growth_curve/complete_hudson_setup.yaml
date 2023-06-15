@@ -99,5 +99,3 @@ flowdef:
       position: payload.tip_box_position
     checks: null
     comment: Reset Tip Box Number to 96 Tips
-
-  
