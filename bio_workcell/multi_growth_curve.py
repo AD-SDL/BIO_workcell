@@ -37,52 +37,81 @@ def main():
     iterations = 0
     removals = 0
     incubation_start_times = []
-
-    while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) == 0):
+    #The experiment will run until all of the plates are used (indicated by iterations < EXPERIMENT_ITERATIONS) and there are no more plates in the incubator (indicated by len(incubation_start_times) != 0)
+    while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) != 0):
+        #Check to see if there are any more plates to run, indicated by EXPERIMENT_ITERATIONS
         if(iterations < EXPERIMENT_ITERATIONS):
+            #Set up the experiment based on the number of iterations passed.
             setup(iterations)
+            #Calculate the ID of the plate needed for incubation based on the number of iterations that have passed
             liconic_id = iterations + 1
+            #Run the experiment from the Hudson Solo step to the incubation step at a specified Liconic ID
             T0_Reading(liconic_id)
+            #Add the time of the incubation start to the array of 96 well plates that are currently in the incubator
             incubation_start_times.append(round(time.time()))
+            #Since an iteration has now passed (the plate is in the incubator), increase the index of incubation iterations
             iterations = iterations + 1
+            #Based on the total number of completed incubation iterations, determine what needs to be disposed of from the experimental setup.
             if(iterations % 2 == 0):
                 dispose(iterations)
+        #Check to see if delta current time and the time at which the well plate currently incubating longest exceeds the incubation time.
         if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+            #Calcuate the ID of the 96 well plate needed for removal from the incubator based on the number of plates that have already been removed.
             liconic_id = removals + 1
+            #Complete the experiment starting from the removal of the 96 well plate at the specified incubation ID and ending at a Hidex T12 Reading.
             T12_Reading(liconic_id)
+            #Remove the incubation start time of the plate that was just read from the array to update the new longest incubating well plate
             incubation_start_times.pop(0)
+            #Increase the total number of removals that have now occurred.
             removals = removals + 1
 
 
-def dispose(iteration_number_after_increment):
+def dispose(completed_iterations):
+    #Set the default disposal index of the serial dilution plate to Stack 2.
     disposal_index = "Stack2"
-    stack_type = iteration_number_after_increment/2
+    #To identify the LidNest location of where certain serial dilution plates must be held, divide the completed iterations by 2
+    stack_type = completed_iterations/2
+    #For the first two serial dilution plates, define the disposal index as LidNest 1 for the first serial dilution plate and LidNest 2 for the second serial dilution plate
     if(stack_type <= 2):
         disposal_index = "LidNest", stack_type
+    #For the fourth serial dilution plate, define the disposal index as LidNest 3.
+    #We are not defining the disposal index as LidNest 3 for the third serial dilution plate because there will already be a growth media plate on LidNest 3. This growth media plate will be removed in the subsequent setup function
     if(stack_type == 4):
-        disposal_index = "LidNest", 3
+        disposal_index = "LidNest3"
+    #Add the disposal index to the payload
     payload={
         'disposal_location':  disposal_index,    
         }
+    #Run the despose Yaml File with the dedicated disposal location
     run_WEI(DISPOSE_BOX_PLATE_FILE_PATH, payload, False)
     if(stack_type % 3 == 0):
+    #If the Stack Type is a multiple of 3 (6 complete iterations of the Hudson experiment have occurred), dispose of the growth media deep well plate
         run_WEI(DISPOSE_GROWTH_MEDIA_FILE_PATH, None, False)
 
 def setup(iteration_number):
+    #If currently on an even number of iterations, add a tip box, serial dilution plate, and 96 well plate to the experiment.
     if(iteration_number % 2 == 0):
+        #Identify the Tip Box Position Index, so it can be refilled on the Hudson Client
         complete_payload={
                 'tip_box_position': 3,
             }
+        #Run the Yaml file that outlines the setup procedure for the tip box, serial dilution plate, and 96 well plate.
         run_WEI(COMPLETE_HUDSON_SETUP_FILE_PATH, complete_payload, False)
+        #If currently on a number of iterations that is a factor of 6, add a growth media plate to the experiment as well
         if(iteration_number % 6 == 0):
-            LidNest_index = 3 - iteration_number/6
+            #Specify the LidNest index of the growth well media plate that will be added to the setup (This equation assumes that there are only two growth media plates on LidNest 2 and LidNest 3 respectively for a total of 12 runs)
+            LidNest_index = 2 + iteration_number/6
+            #Convert the index to a readable string
             plateCrane_readable_index = "LidNest", LidNest_index
+            #Add the LidNest Index to the payload
             payload={
                 'lidnest_index':  plateCrane_readable_index,
-                'tip_box_position': 3,  
             }
+            #Run the Yaml file that outlines the setup procedure for the growth media plate
             run_WEI(SETUP_GROWTH_MEDIA_FILE_PATH, payload, False)
+    #If currently on an even number of iterations, add a 96 well plate to the experiment.
     else: 
+        #Run the Yaml file that outlines the setup procedure for ONLY the 96 well plate
         run_WEI(STREAMLINED_HUDSON_SETUP_FILE_PATH, None, False)
         
 def refreshHidex():
