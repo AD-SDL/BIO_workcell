@@ -34,6 +34,6 @@ flowdef:
       target: payload.disposal_location
       source_type: "stack"
       target_type: "stack"
-      plate_type: "nest_96_wellplate_2ml_deep"
+      plate_type: "96_deep_well"
     checks: null
     comment: Place plate in Solo Position4

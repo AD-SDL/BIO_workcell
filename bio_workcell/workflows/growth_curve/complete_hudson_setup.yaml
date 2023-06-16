@@ -34,7 +34,7 @@ flowdef:
   #     target: "PeelerNest"
   #     source_type: "stack"
   #     target_type: "module"
-  #     plate_type: "nest_96_wellplate_2ml_deep"
+  #     plate_type: "96_deep_well"
   #   checks: null
   #   comment: Place plate in Solo Position4
 
@@ -54,7 +54,7 @@ flowdef:
       target: "Solo.Position6"
       source_type: "module"
       target_type: "stack"
-      plate_type: "nest_96_wellplate_2ml_deep"
+      plate_type: "96_deep_well"
     checks: null
     comment: Place plate in Solo Position4
 
