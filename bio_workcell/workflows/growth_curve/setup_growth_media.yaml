@@ -14,14 +14,34 @@ modules:
   - name: camera
 
 flowdef:
-  - name: Move Growth Media Plate from LidNest to Solo Position2
+  - name: Move Growth Media Plate from LidNest to Peeler
     module: plateCrane
     command: transfer
     args:
       source: payload.lidnest_index
-      target: "Solo.Position2"
+      target: "PeelerNest"
       source_type: "stack"
+      target_type: "module"
+      plate_type: "96_deep_well"
+    checks: null
+    comment: Place plate in Solo Position4
+
+  - name: Peel
+    module: peeler
+    command: peel
+    args:
+      test: null
+    checks: null
+    comment: null
+  
+  - name: Move Growth Media Plate from Peeler to Solo Position2
+    module: plateCrane
+    command: transfer
+    args:
+      source: "PeelerNest"
+      target: "Solo.Position2"
+      source_type: "module"
       target_type: "stack"
-      plate_type: "nest_96_wellplate_2ml_deep"
+      plate_type: "96_deep_well"
     checks: null
     comment: Place plate in Solo Position4
