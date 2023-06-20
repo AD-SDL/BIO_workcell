@@ -81,13 +81,13 @@ flowdef:
   #   checks: RESOURCE_CHECK
   #   comment: resource check not implemented, but will be
 
-  - name: Open Hidex
-    module: hidex
-    command: open
-    args: 
-      foo: "bar"
-    checks: null
-    comment: Open Hidex Gate
+  # - name: Open Hidex
+  #   module: hidex
+  #   command: open
+  #   args: 
+  #     foo: "bar"
+  #   checks: null
+  #   comment: Open Hidex Gate
 
   # - name: Move plate from Solo Position4 to Hidex Nest
   #   module: plateCrane
@@ -101,13 +101,13 @@ flowdef:
   #   checks: null
   #   comment: Place plate to Hidex Nest
 
-  - name: run Hidex
-    module: hidex
-    command: run_assay
-    args: 
-      assay_name: "Campaign2_wei_cs"
-    checks: null
-    comment: Run protocol at hidex
+  # - name: run Hidex
+  #   module: hidex
+  #   command: run_assay
+  #   args: 
+  #     assay_name: "Campaign2_wei_cs"
+  #   checks: null
+  #   comment: Run protocol at hidex
 
   - name: Open Hidex
     module: hidex
@@ -117,17 +117,17 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  # - name: Move plate from HidexNest to Sealer
-  #   module: plateCrane
-  #   command: transfer
-  #   args:
-  #     source: "HidexNest2"
-  #     target: "SealerNest"
-  #     source_type: "module"
-  #     target_type: "module"  
-  #     height_offset: "650"
-  #   checks: null
-  #   comment: Place plate to Sealer
+  - name: Move plate from HidexNest to Sealer
+    module: plateCrane
+    command: transfer
+    args:
+      source: "HidexNest2"
+      target: "SealerNest"
+      source_type: "module"
+      target_type: "module"  
+      height_offset: "650"
+    checks: null
+    comment: Place plate to Sealer
 
   - name: Close Hidex
     module: hidex

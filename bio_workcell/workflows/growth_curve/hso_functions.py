@@ -49,7 +49,8 @@ def package_hso(
     
     # delete temp hso file 
     try: 
-        os.remove(temp_file_path)
+        #os.remove(temp_file_path)
+        pass
     except FileNotFoundError as error_msg: 
         # TODO
         raise error_msg

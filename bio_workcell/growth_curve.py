@@ -1,22 +1,19 @@
 #!/usr/bin/env python3
 
-import logging
 from pathlib import Path
-from argparse import ArgumentParser
-from rpl_wei.wei_workcell_base import WEI
+#from rpl_wei.wei_workcell_base import WEI
 from tools.c2_flow import c2_flow
 from pathlib import Path
-from datetime import datetime
 from workflows.growth_curve.hso_functions import package_hso
 from workflows.growth_curve import solo_step1, solo_step2, solo_step3
+from rpl_wei import Experiment
 import time
 
 def main():
     wf_path_1 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/create_plate_T0.yaml')
     wf_path_2 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/read_plate_T12.yaml')
-
-    wei_client = WEI(wf_config = wf_path_1.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
-
+    exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
+    exp.register_exp() 
     payload={
         'temp': 37.0, 
         'humidity': 95.0,
@@ -32,6 +29,7 @@ def main():
         }
 
     # from somewhere import create_hso? or directly the solo script
+    exp.events.log_local_compute("package_hso")
     hso_1, hso_1_lines, hso_1_basename = package_hso(solo_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso") 
     hso_2, hso_2_lines, hso_2_basename = package_hso(solo_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso")  
     hso_3, hso_3_lines, hso_3_basename = package_hso(solo_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso")  
@@ -48,48 +46,48 @@ def main():
     payload['hso_3'] = hso_3
     payload['hso_3_lines'] = hso_3_lines
     payload['hso_3_basename'] = hso_3_basename
-
+    
     # #run Growth Create Plate
-    run_info = wei_client.run_workflow(payload=payload)
-    print(run_info)
-    # test = run_info["hist"]["run Hidex"]["step_response"]
-    # test = test.replace('\\', '/')
-    # test = test.replace("C:/", "/C/")
-    # flow_title = Path(test) #Path(run_info["hist"]["run_assay"]["step_response"])
-    # fname = flow_title.name
-    # flow_title = flow_title.parents[0]
-    # c2_flow("hidex_test", str(fname.split('.')[0]), "test", flow_title, fname)
+    flow_info = exp.run_job(wf_path_1.resolve(), payload=payload, simulate=False)
 
-    # wait while incubating
+    flow_status = exp.query_job(flow_info["job_id"])
+    while(flow_status["status"] != "finished" and flow_status["status"] != "failure"):
+        flow_status = exp.query_job(flow_info["job_id"])
+        time.sleep(3)
+
+    run_info = flow_status["result"]
+    run_info["run_dir"] = Path(run_info["run_dir"])
+
+    print(run_info)
+    hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
+    hidex_file_path = hidex_file_path.replace('\\', '/')
+    hidex_file_path = hidex_file_path.replace("C:/", "/C/")
+    flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
+    fname = flow_title.name
+    flow_title = flow_title.parents[0]
+  
+    c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
+    #wait while incubating
     time.sleep(43200)
 
-    # # read plate
-    wei_client = WEI(wf_config = wf_path_2.resolve(), workcell_log_level=logging.ERROR, workflow_log_level=logging.ERROR)
-    run_info = wei_client.run_workflow(payload=payload)
-    print(run_info)
-    # test = run_info["hist"]["run Hidex"]["step_response"]
-    # test = test.replace('\\', '/')
-    # test = test.replace("C:/", "/C/")
-    # flow_title = Path(test) #Path(run_info["hist"]["run_assay"]["step_response"])
-    # fname = flow_title.name
-    # flow_title = flow_title.parents[0]
-    # c2_flow("hidex_test", str(fname.split('.')[0]), "test", flow_title, fname)
+    # read plate
+    flow_info = exp.run_job(wf_path_2.resolve(), payload=payload, simulate=False)
 
+    flow_status = exp.query_job(flow_info["job_id"])
+    while(flow_status["status"] != "finished" and flow_status["status"] != "failure"):
+        flow_status = exp.query_job(flow_info["job_id"])
+        time.sleep(3)
 
-
-    # un_workflow(payload=payload)
-    #     print(run_info)
-    # orkflow(payload=payload)
-    #     print(run_info)
-    # # store plate_n, payload, and time into a db
-    # # publish flow
-    # # loop here
-    # ###################
-    # #check if any plate on db has 12h
-    # #create new payload
-    # #run measure_plate
-    # #publish again
-    # #loop here
+    run_info = flow_status["result"]
+    run_info["run_dir"] = Path(run_info["run_dir"])
+    hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
+    hidex_file_path = hidex_file_path.replace('\\', '/')
+    hidex_file_path = hidex_file_path.replace("C:/", "/C/")
+    flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
+    fname = flow_title.name
+    flow_title = flow_title.parents[0]
+  
+    c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
     
 if __name__ == "__main__":
     main()
