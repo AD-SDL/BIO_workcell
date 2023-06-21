@@ -14,18 +14,29 @@ modules:
   - name: camera
 
 flowdef:
-  - name: Open Hidex
-    module: hidex
-    command: open
-    args: 
-      foo: "bar"
+  - name: Move tip bin from Solo Position3 to Stack 1
+    module: plateCrane
+    command: transfer
+    args:
+      source: "Solo.Position3"
+      target: "Stack1"
+      source_type: "stack"
+      target_type: "stack"
+      plate_type: "tip_box_lid_off"
     checks: null
-    comment: Open Hidex Gate
+    comment: Place plate in Solo Position3
+  # - name: Open Hidex
+  #   module: hidex
+  #   command: open
+  #   args: 
+  #     foo: "bar"
+  #   checks: null
+  #   comment: Open Hidex Gate
 
-  - name: Close Hidex
-    module: hidex
-    command: close
-    args: 
-      foo: "bar"
-    checks: null
-    comment: Close Hidex Gate
+  # - name: Close Hidex
+  #   module: hidex
+  #   command: close
+  #   args: 
+  #     foo: "bar"
+  #   checks: null
+  #   comment: Close Hidex Gate

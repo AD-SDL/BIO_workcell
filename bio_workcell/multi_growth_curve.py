@@ -79,7 +79,7 @@ def dispose(completed_iterations):
     stack_type = completed_iterations/2
     #For the first two serial dilution plates, define the disposal index as LidNest 1 for the first serial dilution plate and LidNest 2 for the second serial dilution plate
     if(stack_type <= 2):
-        disposal_index = "LidNest" + str(stack_type)
+        disposal_index = "LidNest" + str(int(stack_type))
     #For the fourth serial dilution plate, define the disposal index as LidNest 3.
     #We are not defining the disposal index as LidNest 3 for the third serial dilution plate because there will already be a growth media plate on LidNest 3. This growth media plate will be removed in the subsequent setup function
     if(stack_type == 4):
@@ -108,7 +108,7 @@ def setup(iteration_number):
             #Specify the LidNest index of the growth well media plate that will be added to the setup (This equation assumes that there are only two growth media plates on LidNest 2 and LidNest 3 respectively for a total of 12 runs)
             LidNest_index = 2 + iteration_number/6
             #Convert the index to a readable string
-            plateCrane_readable_index = "LidNest" + str(LidNest_index)
+            plateCrane_readable_index = "LidNest" + str(int(LidNest_index))
             #Add the LidNest Index to the payload
             payload={
                 'lidnest_index':  plateCrane_readable_index,
@@ -124,7 +124,7 @@ def refreshHidex():
     run_WEI(HIDEX_OPEN_CLOSE_FILE_PATH, None, False)
 
 def T0_Reading(liconic_plate_id):
-    plate_id = '' + str(liconic_plate_id)
+    plate_id = '' + str(int(liconic_plate_id))
     payload={
         'temp': 37.0, 
         'humidity': 95.0,
@@ -162,7 +162,7 @@ def T0_Reading(liconic_plate_id):
 
 
 def T12_Reading(liconic_plate_id):
-    plate_id = '' + str(liconic_plate_id)
+    plate_id = '' + str(int(liconic_plate_id))
 
     payload={
         'temp': 37.0, 
@@ -210,16 +210,16 @@ def run_WEI(file_location, payload_class, Hidex_Used):
     run_info = flow_status["result"]
     run_info["run_dir"] = Path(run_info["run_dir"])
 
-    if Hidex_Used:
-        print(run_info)
-        hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
-        hidex_file_path = hidex_file_path.replace('\\', '/')
-        hidex_file_path = hidex_file_path.replace("C:/", "/C/")
-        flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-        fname = flow_title.name
-        flow_title = flow_title.parents[0]
+    # if Hidex_Used:
+    #     print(run_info)
+    #     hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
+    #     hidex_file_path = hidex_file_path.replace('\\', '/')
+    #     hidex_file_path = hidex_file_path.replace("C:/", "/C/")
+    #     flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
+    #     fname = flow_title.name
+    #     flow_title = flow_title.parents[0]
 
-        c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
+    #     c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
 
 if __name__ == "__main__":
     main()

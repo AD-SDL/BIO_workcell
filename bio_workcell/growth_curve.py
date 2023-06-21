@@ -10,7 +10,7 @@ from rpl_wei import Experiment
 import time
 
 def main():
-    wf_path_1 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/create_plate_T0.yaml')
+    wf_path_1 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/liconic_test.yaml')
     wf_path_2 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/read_plate_T12.yaml')
     exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
     exp.register_exp() 
@@ -59,35 +59,35 @@ def main():
     run_info["run_dir"] = Path(run_info["run_dir"])
 
     print(run_info)
-    hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
-    hidex_file_path = hidex_file_path.replace('\\', '/')
-    hidex_file_path = hidex_file_path.replace("C:/", "/C/")
-    flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-    fname = flow_title.name
-    flow_title = flow_title.parents[0]
+    # hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
+    # hidex_file_path = hidex_file_path.replace('\\', '/')
+    # hidex_file_path = hidex_file_path.replace("C:/", "/C/")
+    # flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
+    # fname = flow_title.name
+    # flow_title = flow_title.parents[0]
   
-    c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
+    # c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
     #wait while incubating
-    time.sleep(43200)
+    # time.sleep(43200)
 
-    # read plate
-    flow_info = exp.run_job(wf_path_2.resolve(), payload=payload, simulate=False)
+    # # read plate
+    # flow_info = exp.run_job(wf_path_2.resolve(), payload=payload, simulate=False)
 
-    flow_status = exp.query_job(flow_info["job_id"])
-    while(flow_status["status"] != "finished" and flow_status["status"] != "failure"):
-        flow_status = exp.query_job(flow_info["job_id"])
-        time.sleep(3)
+    # flow_status = exp.query_job(flow_info["job_id"])
+    # while(flow_status["status"] != "finished" and flow_status["status"] != "failure"):
+    #     flow_status = exp.query_job(flow_info["job_id"])
+    #     time.sleep(3)
 
-    run_info = flow_status["result"]
-    run_info["run_dir"] = Path(run_info["run_dir"])
-    hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
-    hidex_file_path = hidex_file_path.replace('\\', '/')
-    hidex_file_path = hidex_file_path.replace("C:/", "/C/")
-    flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-    fname = flow_title.name
-    flow_title = flow_title.parents[0]
+    # run_info = flow_status["result"]
+    # run_info["run_dir"] = Path(run_info["run_dir"])
+    # hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
+    # hidex_file_path = hidex_file_path.replace('\\', '/')
+    # hidex_file_path = hidex_file_path.replace("C:/", "/C/")
+    # flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
+    # fname = flow_title.name
+    # flow_title = flow_title.parents[0]
   
-    c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
+    # c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
     
 if __name__ == "__main__":
     main()
