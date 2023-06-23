@@ -6,11 +6,12 @@ from tools.c2_flow import c2_flow
 from pathlib import Path
 from workflows.growth_curve.hso_functions import package_hso
 from workflows.growth_curve import solo_step1, solo_step2, solo_step3
+from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
 from rpl_wei import Experiment
 import time
 
 def main():
-    wf_path_1 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/liconic_test.yaml')
+    wf_path_1 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/create_plate_T0.yaml')
     wf_path_2 = Path('/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/read_plate_T12.yaml')
     exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
     exp.register_exp() 
@@ -30,9 +31,9 @@ def main():
 
     # from somewhere import create_hso? or directly the solo script
     exp.events.log_local_compute("package_hso")
-    hso_1, hso_1_lines, hso_1_basename = package_hso(solo_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso") 
-    hso_2, hso_2_lines, hso_2_basename = package_hso(solo_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso")  
-    hso_3, hso_3_lines, hso_3_basename = package_hso(solo_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso")  
+    hso_1, hso_1_lines, hso_1_basename = package_hso(solo_multi_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso") 
+    hso_2, hso_2_lines, hso_2_basename = package_hso(solo_multi_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso")  
+    hso_3, hso_3_lines, hso_3_basename = package_hso(solo_multi_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso")  
 
     # update payload with solo hso details
     payload['hso_1'] = hso_1
@@ -67,8 +68,16 @@ def main():
     # flow_title = flow_title.parents[0]
   
     # c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
-    #wait while incubating
-    # time.sleep(43200)
+    # #wait while incubating
+    # # time.sleep(43200)
+
+    # startTime = round(time.time())
+    # while((round(time.time()) - startTime) < 12600):
+    #     seconds = int(round(time.time()))
+    #     minutes = seconds % 60
+    #     hours = minutes % 60
+    #     print("Time Since Start: ", hours, " Hours, ", minutes, " Minutes, ", seconds, " Seconds")
+
 
     # # read plate
     # flow_info = exp.run_job(wf_path_2.resolve(), payload=payload, simulate=False)
@@ -80,6 +89,8 @@ def main():
 
     # run_info = flow_status["result"]
     # run_info["run_dir"] = Path(run_info["run_dir"])
+
+    # print(run_info)
     # hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
     # hidex_file_path = hidex_file_path.replace('\\', '/')
     # hidex_file_path = hidex_file_path.replace("C:/", "/C/")
@@ -87,7 +98,6 @@ def main():
     # fname = flow_title.name
     # flow_title = flow_title.parents[0]
   
-    # c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
-    
+
 if __name__ == "__main__":
     main()
