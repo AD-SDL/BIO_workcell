@@ -7,6 +7,8 @@ from tools.c2_flow import c2_flow
 from pathlib import Path
 from workflows.growth_curve.hso_functions import package_hso
 from workflows.growth_curve import solo_step1, solo_step2, solo_step3
+from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
+
 from rpl_wei import Experiment
 
 #from rpl_wei.wei_workcell_base import WEI
@@ -140,9 +142,9 @@ def T0_Reading(liconic_plate_id):
         }
 
     # from somewhere import create_hso? or directly the solo script
-    hso_1, hso_1_lines, hso_1_basename = package_hso(solo_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso") 
-    hso_2, hso_2_lines, hso_2_basename = package_hso(solo_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso")  
-    hso_3, hso_3_lines, hso_3_basename = package_hso(solo_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso")  
+    hso_1, hso_1_lines, hso_1_basename = package_hso(solo_multi_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso") 
+    hso_2, hso_2_lines, hso_2_basename = package_hso(solo_multi_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso")  
+    hso_3, hso_3_lines, hso_3_basename = package_hso(solo_multi_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso")  
 
     # update payload with solo hso details
     payload['hso_1'] = hso_1
@@ -179,9 +181,9 @@ def T12_Reading(liconic_plate_id):
         }
 
     # from somewhere import create_hso? or directly the solo script
-    hso_1, hso_1_lines, hso_1_basename = package_hso(solo_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso") 
-    hso_2, hso_2_lines, hso_2_basename = package_hso(solo_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso")  
-    hso_3, hso_3_lines, hso_3_basename = package_hso(solo_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso")  
+    hso_1, hso_1_lines, hso_1_basename = package_hso(solo_multi_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso") 
+    hso_2, hso_2_lines, hso_2_basename = package_hso(solo_multi_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso")  
+    hso_3, hso_3_lines, hso_3_basename = package_hso(solo_multi_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso")  
 
     # update payload with solo hso details
     payload['hso_1'] = hso_1
