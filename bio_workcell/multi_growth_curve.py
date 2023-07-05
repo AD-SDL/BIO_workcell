@@ -19,6 +19,8 @@ INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
 INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
 HIDEX_IDLE_THRESHOLD_SECONDS = 3600
 
+AI_MODEL_IN_USE = True
+
 COMPLETE_HUDSON_SETUP_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/complete_hudson_setup.yaml'
 STREAMLINED_HUDSON_SETUP_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/streamlined_hudson_setup.yaml'
 SETUP_GROWTH_MEDIA_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/setup_growth_media.yaml'
@@ -35,7 +37,35 @@ exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
 exp.register_exp() 
 exp.events.log_local_compute("package_hso")
 
-def main(): 
+def main():
+    if AI_MODEL_IN_USE:
+        load_model()
+        predict_experiment()
+    determine_payload_from_excel()
+    run_experiment()
+    if AI_MODEL_IN_USE:
+        train_model()
+        save_model()
+
+def load_model():
+    STRING_RECEIVE_URL = ''
+    
+def predict_experiment():
+    antibiotic_wells = []
+    cell_wells = []
+    plate_ids = []
+    return antibiotic_wells, cell_wells, plate_ids
+
+def determine_payload_from_excel():
+    EXCEL_FILE_PATH = ''
+
+def train_model():
+    WeIGHT = .5
+
+def save_model():
+    STRING_PATH_URL = ''
+
+def run_experiment(): 
     iterations = 0
     removals = 0
     incubation_start_times = []
