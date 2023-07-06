@@ -3,18 +3,18 @@
 import logging
 from argparse import ArgumentParser
 import time
-from tools.c2_flow import c2_flow
+# from tools.c2_flow import c2_flow
 from pathlib import Path
-from workflows.growth_curve.hso_functions import package_hso
-from workflows.growth_curve import solo_step1, solo_step2, solo_step3
-from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
+# from workflows.growth_curve.hso_functions import package_hso
+# from workflows.growth_curve import solo_step1, solo_step2, solo_step3
+# from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
 import pandas as pd 
 import pathlib
 import openpyxl
-
+import tensorflow as tf
 import os
 
-from rpl_wei import Experiment
+# from rpl_wei import Experiment
 
 #from rpl_wei.wei_workcell_base import WEI
 
@@ -22,7 +22,6 @@ EXPERIMENT_ITERATIONS = 1
 INCUBATION_TIME_HOURS = 0.1
 INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
 INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
-HIDEX_IDLE_THRESHOLD_SECONDS = 3600
 CULTURE_PAYLOAD = []
 MEDIA_PAYLOAD = []
 
@@ -40,9 +39,9 @@ DISPOSE_GROWTH_MEDIA_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/
 
 HIDEX_OPEN_CLOSE_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/open_close_hidex.yaml'
 
-exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
-exp.register_exp() 
-exp.events.log_local_compute("package_hso")
+# exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
+# exp.register_exp() 
+# exp.events.log_local_compute("package_hso")
 
 def main():
     if AI_MODEL_IN_USE:
@@ -65,7 +64,11 @@ def predict_experiment():
 
 def determine_payload_from_excel():
     print("Run Log Starts Now")
-    path_name = str(pathlib.Path().resolve()) + "\\bio_workcell\\active_runs\\Sample Excel Experiment Run Document.xlsx"
+    folder_path = str(pathlib.Path().resolve()) + "\\bio_workcell\\active_runs"
+    files = os.listdir(folder_path)
+    excel_files = [file for file in files if file.endswith(".xlsx")]
+    sorted_files = sorted(excel_files, key=lambda x: os.path.getmtime(os.path.join(folder_path, x)))
+    path_name = os.path.join(folder_path, sorted_files[0])
     print(path_name)
     workbook = openpyxl.load_workbook(filename=path_name)
     worksheet = workbook['Complete_Run_Layout']
@@ -83,6 +86,8 @@ def determine_payload_from_excel():
             added_items = added_items + 1
     if(len(MEDIA_PAYLOAD) != EXPERIMENT_ITERATIONS):
         EXPERIMENT_ITERATIONS = len(MEDIA_PAYLOAD)
+    print(MEDIA_PAYLOAD)
+    print(EXPERIMENT_ITERATIONS)
 
 
 def train_model():
@@ -290,6 +295,7 @@ if __name__ == "__main__":
 
 
 # Previous Functions/Workflows
+# HIDEX_IDLE_THRESHOLD_SECONDS = 3600
 
 # def two():
 #     iterations = 0
