@@ -62,7 +62,7 @@ flowdef:
     checks: nullpayload.stacker
     comment: Place plate in Hidex Nest
 
-  - name: Run Protocol Hidex
+  - name: run Hidex
     module: hidex
     command: run_assay
     args: 

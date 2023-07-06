@@ -45,7 +45,7 @@ def generate_hso_file(
 # * Other program variables
     blowoff_volume = 10
     num_mixes = 3
-    media_z_shift = 0.5
+    media_z_shift = 1
     reservoir_z_shift = 0.5  # z shift for deep blocks (Deck Positions 3 and 5)
     flat_bottom_z_shift = 2  # Note: 1 is not high enough (tested)
 

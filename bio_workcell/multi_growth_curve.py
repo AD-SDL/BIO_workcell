@@ -3,18 +3,18 @@
 import logging
 from argparse import ArgumentParser
 import time
-# from tools.c2_flow import c2_flow
+from tools.c2_flow import c2_flow
 from pathlib import Path
-# from workflows.growth_curve.hso_functions import package_hso
-# from workflows.growth_curve import solo_step1, solo_step2, solo_step3
-# from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
+from workflows.growth_curve.hso_functions import package_hso
+from workflows.growth_curve import solo_step1, solo_step2, solo_step3
+from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
 import pandas as pd 
 import pathlib
 import openpyxl
-import tensorflow as tf
+#import tensorflow as tf
 import os
 
-# from rpl_wei import Experiment
+from rpl_wei import Experiment
 
 #from rpl_wei.wei_workcell_base import WEI
 
@@ -39,9 +39,9 @@ DISPOSE_GROWTH_MEDIA_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/
 
 HIDEX_OPEN_CLOSE_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/open_close_hidex.yaml'
 
-# exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
-# exp.register_exp() 
-# exp.events.log_local_compute("package_hso")
+exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
+exp.register_exp() 
+exp.events.log_local_compute("package_hso")
 
 def main():
     if AI_MODEL_IN_USE:
@@ -64,7 +64,8 @@ def predict_experiment():
 
 def determine_payload_from_excel():
     print("Run Log Starts Now")
-    folder_path = str(pathlib.Path().resolve()) + "\\bio_workcell\\active_runs"
+    #folder_path = str(pathlib.Path().resolve()) + "\\bio_workcell\\active_runs"
+    folder_path = str(pathlib.Path().resolve()) + "/active_runs"
     files = os.listdir(folder_path)
     excel_files = [file for file in files if file.endswith(".xlsx")]
     sorted_files = sorted(excel_files, key=lambda x: os.path.getmtime(os.path.join(folder_path, x)))
@@ -165,19 +166,24 @@ def setup(iteration_number):
                 'tip_box_position': 3,
             }
         #Run the Yaml file that outlines the setup procedure for the tip box, serial dilution plate, and 96 well plate.
+        print("Starting Complete Hudson Setup")
         run_WEI(COMPLETE_HUDSON_SETUP_FILE_PATH, complete_payload, False)
+        print("Finished Complete Setup")
         #If currently on a number of iterations that is a factor of 6, add a growth media plate to the experiment as well
         if(iteration_number % 6 == 0):
             #Specify the LidNest index of the growth well media plate that will be added to the setup (This equation assumes that there are only two growth media plates on LidNest 2 and LidNest 3 respectively for a total of 12 runs)
             LidNest_index = 2 + iteration_number/6
             #Convert the index to a readable string
             plateCrane_readable_index = "LidNest" + str(int(LidNest_index))
+            print("LidNest Being Used: ", plateCrane_readable_index)
             #Add the LidNest Index to the payload
             payload={
                 'lidnest_index':  plateCrane_readable_index,
             }
             #Run the Yaml file that outlines the setup procedure for the growth media plate
+            print("Starting Growth Media Setup")
             run_WEI(SETUP_GROWTH_MEDIA_FILE_PATH, payload, False)
+            print("Finished Growth Media Setup!")
     #If currently on an even number of iterations, add a 96 well plate to the experiment.
     else: 
         #Run the Yaml file that outlines the setup procedure for ONLY the 96 well plate
@@ -188,7 +194,7 @@ def refreshHidex():
 
 def T0_Reading(liconic_plate_id):
     plate_id = '' + str(int(liconic_plate_id))
-    treatment_col_id = "col" + str(int(MEDIA_PAYLOAD[liconic_plate_id]))
+    treatment_col_id = "col" + str(int(MEDIA_PAYLOAD[liconic_plate_id-1]))
     culture_col_id = int(CULTURE_PAYLOAD[liconic_plate_id-1])
     payload={
         'temp': 37.0, 
@@ -289,6 +295,7 @@ def run_WEI(file_location, payload_class, Hidex_Used):
 if __name__ == "__main__":
     #main()
     determine_payload_from_excel()
+    run_experiment()
 
 #!/usr/bin/env python3
 
