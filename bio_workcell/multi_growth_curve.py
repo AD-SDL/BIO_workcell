@@ -8,6 +8,11 @@ from pathlib import Path
 from workflows.growth_curve.hso_functions import package_hso
 from workflows.growth_curve import solo_step1, solo_step2, solo_step3
 from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
+import pandas as pd 
+import pathlib
+import openpyxl
+
+import os
 
 from rpl_wei import Experiment
 
@@ -18,6 +23,8 @@ INCUBATION_TIME_HOURS = 0.1
 INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
 INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
 HIDEX_IDLE_THRESHOLD_SECONDS = 3600
+CULTURE_PAYLOAD = []
+MEDIA_PAYLOAD = []
 
 AI_MODEL_IN_USE = True
 
@@ -57,7 +64,26 @@ def predict_experiment():
     return antibiotic_wells, cell_wells, plate_ids
 
 def determine_payload_from_excel():
-    EXCEL_FILE_PATH = ''
+    print("Run Log Starts Now")
+    path_name = str(pathlib.Path().resolve()) + "\\bio_workcell\\active_runs\\Sample Excel Experiment Run Document.xlsx"
+    print(path_name)
+    workbook = openpyxl.load_workbook(filename=path_name)
+    worksheet = workbook['Complete_Run_Layout']
+    EXPERIMENT_ITERATIONS = worksheet['A1'].value
+    INCUBATION_TIME_HOURS = worksheet['E1'].value
+    added_items = 0
+    for i in range(2,13):
+        column_letter = chr(ord('@')+i)
+        run_number_cell_id = column_letter + "3"
+        media_type_cell_id = column_letter + "4"
+        culture_type_cell_id = column_letter + "5"
+        if(worksheet[run_number_cell_id].value != None and worksheet[media_type_cell_id].value != None and worksheet[culture_type_cell_id].value != None):      
+            MEDIA_PAYLOAD.append(worksheet[media_type_cell_id].value)
+            CULTURE_PAYLOAD.append(worksheet[culture_type_cell_id].value) 
+            added_items = added_items + 1
+    if(len(MEDIA_PAYLOAD) != EXPERIMENT_ITERATIONS):
+        EXPERIMENT_ITERATIONS = len(MEDIA_PAYLOAD)
+
 
 def train_model():
     WeIGHT = .5
@@ -157,14 +183,16 @@ def refreshHidex():
 
 def T0_Reading(liconic_plate_id):
     plate_id = '' + str(int(liconic_plate_id))
+    treatment_col_id = "col" + str(int(MEDIA_PAYLOAD[liconic_plate_id]))
+    culture_col_id = int(CULTURE_PAYLOAD[liconic_plate_id-1])
     payload={
         'temp': 37.0, 
         'humidity': 95.0,
         'shaker_speed': 30,
         "stacker": 1, 
         "slot": 1,
-        "treatment": "col1", # string of treatment name. Ex. "col1", "col2"
-        "culture_column": 1,  # int of cell culture column. Ex. 1, 2, 3, etc.
+        "treatment": treatment_col_id, # string of treatment name. Ex. "col1", "col2"
+        "culture_column": culture_col_id,  # int of cell culture column. Ex. 1, 2, 3, etc.
         "culture_dil_column": 1, # int of dilution column for 1:10 culture dilutions. Ex. 1, 2, 3, etc.
         "media_start_column": 1,  # int of column to draw media from (requires 2 columns, 1 means columns 1 and 2) Ex. 1, 3, 5, etc.
         "treatment_dil_half": 1,  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2. 
@@ -254,7 +282,8 @@ def run_WEI(file_location, payload_class, Hidex_Used):
     #     c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
 
 if __name__ == "__main__":
-    main()
+    #main()
+    determine_payload_from_excel()
 
 #!/usr/bin/env python3
 
