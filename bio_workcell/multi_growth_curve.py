@@ -156,44 +156,44 @@ def run_experiment(total_iterations, incubation_time_sec):
     print("Current Iteration Variable: ", iterations)
     print("Total Iterations: ", incubation_time_sec)
     # The experiment will run until all of the plates are used (indicated by iterations < total_iterations) and there are no more plates in the incubator (indicated by len(incubation_start_times) != 0)
-    # while(iterations < total_iterations or len(incubation_start_times) != 0):
-    #     #Debug Log
-    #     print("Starting Experiment ", iterations, ": Started Loop")
-    #     #Check to see if there are any more plates to run, indicated by total_iterations
-    #     if(iterations < total_iterations):
-    #         #Set up the experiment based on the number of iterations passed.
-    #         setup(iterations)
-    #         #Calculate the ID of the plate needed for incubation based on the number of iterations that have passed
-    #         liconic_id = iterations + 1
-    #         #Run the experiment from the Hudson Solo step to the incubation step at a specified Liconic ID
-    #         print("Starting T0 Readnig")
-    #         T0_Reading(liconic_id)
-    #         print("Finished T0 Reading")
-    #         #Add the time of the incubation start to the array of 96 well plates that are currently in the incubator
-    #         incubation_start_times.append(round(time.time()))
-    #         #Since an iteration has now passed (the plate is in the incubator), increase the index of incubation iterations
-    #         iterations = iterations + 1
-    #         #Debug Log
-    #         print("Completed Iterations: ", iterations, " ... Start Times: " , incubation_start_times)
-    #         #Based on the total number of completed incubation iterations, determine what needs to be disposed of from the experimental setup.
-    #         if(iterations % 2 == 0):
-    #             print("Starting Disposal")
-    #             dispose(iterations)
-    #             print("Ending Disposal")
-    #     #Check to see if delta current time and the time at which the well plate currently incubating longest exceeds the incubation time.
-    #     if(round(time.time()) - incubation_start_times[0] > incubation_time_sec):
-    #         #Debug Log
-    #         print("Finishing Up Experiment ", removals, ": Ending Loop")
-    #         #Calcuate the ID of the 96 well plate needed for removal from the incubator based on the number of plates that have already been removed.
-    #         liconic_id = removals + 1
-    #         #Complete the experiment starting from the removal of the 96 well plate at the specified incubation ID and ending at a Hidex T12 Reading.
-    #         print("Starting T12 Reading")
-    #         T12_Reading(liconic_id)
-    #         print("Ending T12 Reading")
-    #         #Remove the incubation start time of the plate that was just read from the array to update the new longest incubating well plate
-    #         incubation_start_times.pop(0)
-    #         #Increase the total number of removals that have now occurred.
-    #         removals = removals + 1
+    while(iterations < total_iterations or len(incubation_start_times) != 0):
+        #Debug Log
+        print("Starting Experiment ", iterations, ": Started Loop")
+        #Check to see if there are any more plates to run, indicated by total_iterations
+        if(iterations < total_iterations):
+            #Set up the experiment based on the number of iterations passed.
+            setup(iterations)
+            #Calculate the ID of the plate needed for incubation based on the number of iterations that have passed
+            liconic_id = iterations + 1
+            #Run the experiment from the Hudson Solo step to the incubation step at a specified Liconic ID
+            print("Starting T0 Readnig")
+            T0_Reading(liconic_id)
+            print("Finished T0 Reading")
+            #Add the time of the incubation start to the array of 96 well plates that are currently in the incubator
+            incubation_start_times.append(round(time.time()))
+            #Since an iteration has now passed (the plate is in the incubator), increase the index of incubation iterations
+            iterations = iterations + 1
+            #Debug Log
+            print("Completed Iterations: ", iterations, " ... Start Times: " , incubation_start_times)
+            #Based on the total number of completed incubation iterations, determine what needs to be disposed of from the experimental setup.
+            if(iterations % 2 == 0):
+                print("Starting Disposal")
+                dispose(iterations)
+                print("Ending Disposal")
+        #Check to see if delta current time and the time at which the well plate currently incubating longest exceeds the incubation time.
+        if(round(time.time()) - incubation_start_times[0] > incubation_time_sec):
+            #Debug Log
+            print("Finishing Up Experiment ", removals, ": Ending Loop")
+            #Calcuate the ID of the 96 well plate needed for removal from the incubator based on the number of plates that have already been removed.
+            liconic_id = removals + 1
+            #Complete the experiment starting from the removal of the 96 well plate at the specified incubation ID and ending at a Hidex T12 Reading.
+            print("Starting T12 Reading")
+            T12_Reading(liconic_id)
+            print("Ending T12 Reading")
+            #Remove the incubation start time of the plate that was just read from the array to update the new longest incubating well plate
+            incubation_start_times.pop(0)
+            #Increase the total number of removals that have now occurred.
+            removals = removals + 1
 
 
 def dispose(completed_iterations):
