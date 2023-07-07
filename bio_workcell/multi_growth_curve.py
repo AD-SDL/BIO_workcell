@@ -11,7 +11,8 @@ from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_mult
 import pandas as pd 
 import pathlib
 import openpyxl
-#import tensorflow as tf
+import tensorflow as tf
+from tensorflow import keras
 import os
 
 from rpl_wei import Experiment
@@ -25,6 +26,8 @@ INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
 CULTURE_PAYLOAD = []
 MEDIA_PAYLOAD = []
 
+TENSORFLOW_MODEL = None
+AI_MODEL_FILE_PATH = ''
 AI_MODEL_IN_USE = True
 
 COMPLETE_HUDSON_SETUP_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/complete_hudson_setup.yaml'
@@ -54,7 +57,20 @@ def main():
         save_model()
 
 def load_model():
-    STRING_RECEIVE_URL = ''
+    if os.path.exists(AI_MODEL_FILE_PATH):
+        TENSORFLOW_MODEL = tf.keras.models.load_model(AI_MODEL_FILE_PATH)
+    else:
+        input_dim = 4 #Cell type, Antibiotic Type, Concentration 1, Concentration 2
+        num_classes = 1 #Growth Rate
+
+        TENSORFLOW_MODEL = keras.Sequential([
+            keras.layers.Dense(64, activation='relu', input_shape=(input_dim,)),
+            keras.layers.Dense(64, activation='relu'),
+            keras.layers.Dense(num_classes, activation='softmax')
+        ])
+
+        TENSORFLOW_MODEL.compile(optimizer='adam', loss='mean_squared_error')
+        TENSORFLOW_MODEL.summary()
     
 def predict_experiment():
     antibiotic_wells = []
