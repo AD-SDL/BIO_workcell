@@ -31,7 +31,7 @@ flowdef:
     command: transfer
     args:
       source: "Solo.Position6"
-      target: disposal_payload.disposal_location
+      target: payload.disposal_location
       source_type: "stack"
       target_type: "stack"
       plate_type: "96_deep_well"

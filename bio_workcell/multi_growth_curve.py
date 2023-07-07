@@ -3,24 +3,24 @@
 import logging
 from argparse import ArgumentParser
 import time
-from tools.c2_flow import c2_flow
+# from tools.c2_flow import c2_flow
 from pathlib import Path
-from workflows.growth_curve.hso_functions import package_hso
-from workflows.growth_curve import solo_step1, solo_step2, solo_step3
-from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
+# from workflows.growth_curve.hso_functions import package_hso
+# from workflows.growth_curve import solo_step1, solo_step2, solo_step3
+# from workflows.growth_curve import solo_multi_step1, solo_multi_step2, solo_multi_step3
 import pandas as pd 
 import pathlib
 import openpyxl
-import tensorflow as tf
-from tensorflow import keras
+# import tensorflow as tf
+# from tensorflow import keras
 import numpy as np
 import os
 
-from rpl_wei import Experiment
+# from rpl_wei import Experiment
 
 #from rpl_wei.wei_workcell_base import WEI
 
-EXPERIMENT_ITERATIONS = 1
+EXPERIMENT_ITERATIONS = 6
 INCUBATION_TIME_HOURS = 0.05
 INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
 INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
@@ -45,9 +45,9 @@ DISPOSE_GROWTH_MEDIA_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/
 
 HIDEX_OPEN_CLOSE_FILE_PATH = '/home/rpl/workspace/BIO_workcell/bio_workcell/workflows/growth_curve/open_close_hidex.yaml'
 
-exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
-exp.register_exp() 
-exp.events.log_local_compute("package_hso")
+# exp = Experiment('127.0.0.1', '8000', 'Growth_Curve')
+# exp.register_exp() 
+# exp.events.log_local_compute("package_hso")
 
 def main():
     if AI_MODEL_IN_USE:
@@ -119,8 +119,8 @@ def predict_experiment():
 
 def determine_payload_from_excel():
     print("Run Log Starts Now")
-    #folder_path = str(pathlib.Path().resolve()) + "\\bio_workcell\\active_runs"
-    folder_path = str(pathlib.Path().resolve()) + "/active_runs"
+    folder_path = str(pathlib.Path().resolve()) + "\\bio_workcell\\active_runs"
+    #folder_path = str(pathlib.Path().resolve()) + "/active_runs"
     files = os.listdir(folder_path)
     excel_files = [file for file in files if file.endswith(".xlsx")]
     sorted_files = sorted(excel_files, key=lambda x: os.path.getmtime(os.path.join(folder_path, x)))
@@ -128,7 +128,7 @@ def determine_payload_from_excel():
     print(path_name)
     workbook = openpyxl.load_workbook(filename=path_name)
     worksheet = workbook['Complete_Run_Layout']
-    EXPERIMENT_ITERATIONS = worksheet['A1'].value
+    EXPERIMENT_ITERATIONS = worksheet['B1'].value
     INCUBATION_TIME_HOURS = worksheet['E1'].value
     added_items = 0
     for i in range(2,13):
@@ -159,45 +159,47 @@ def run_experiment():
     iterations = 0
     removals = 0
     incubation_start_times = []
+    print("Current Iteration Variable: ", iterations)
+    print("Total Iterations: ", EXPERIMENT_ITERATIONS)
     #The experiment will run until all of the plates are used (indicated by iterations < EXPERIMENT_ITERATIONS) and there are no more plates in the incubator (indicated by len(incubation_start_times) != 0)
-    while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) != 0):
-        #Debug Log
-        print("Starting Experiment ", iterations, ": Started Loop")
-        #Check to see if there are any more plates to run, indicated by EXPERIMENT_ITERATIONS
-        if(iterations < EXPERIMENT_ITERATIONS):
-            #Set up the experiment based on the number of iterations passed.
-            setup(iterations)
-            #Calculate the ID of the plate needed for incubation based on the number of iterations that have passed
-            liconic_id = iterations + 1
-            #Run the experiment from the Hudson Solo step to the incubation step at a specified Liconic ID
-            print("Starting T0 Readnig")
-            T0_Reading(liconic_id)
-            print("Finished T0 Reading")
-            #Add the time of the incubation start to the array of 96 well plates that are currently in the incubator
-            incubation_start_times.append(round(time.time()))
-            #Since an iteration has now passed (the plate is in the incubator), increase the index of incubation iterations
-            iterations = iterations + 1
-            #Debug Log
-            print("Completed Iterations: ", iterations, " ... Start Times: " , incubation_start_times)
-            #Based on the total number of completed incubation iterations, determine what needs to be disposed of from the experimental setup.
-            if(iterations % 2 == 0):
-                print("Starting Disposal")
-                dispose(iterations)
-                print("Ending Disposal")
-        #Check to see if delta current time and the time at which the well plate currently incubating longest exceeds the incubation time.
-        if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
-            #Debug Log
-            print("Finishing Up Experiment ", removals, ": Ending Loop")
-            #Calcuate the ID of the 96 well plate needed for removal from the incubator based on the number of plates that have already been removed.
-            liconic_id = removals + 1
-            #Complete the experiment starting from the removal of the 96 well plate at the specified incubation ID and ending at a Hidex T12 Reading.
-            print("Starting T12 Reading")
-            T12_Reading(liconic_id)
-            print("Ending T12 Reading")
-            #Remove the incubation start time of the plate that was just read from the array to update the new longest incubating well plate
-            incubation_start_times.pop(0)
-            #Increase the total number of removals that have now occurred.
-            removals = removals + 1
+    # while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) != 0):
+    #     #Debug Log
+    #     print("Starting Experiment ", iterations, ": Started Loop")
+    #     #Check to see if there are any more plates to run, indicated by EXPERIMENT_ITERATIONS
+    #     if(iterations < EXPERIMENT_ITERATIONS):
+    #         #Set up the experiment based on the number of iterations passed.
+    #         setup(iterations)
+    #         #Calculate the ID of the plate needed for incubation based on the number of iterations that have passed
+    #         liconic_id = iterations + 1
+    #         #Run the experiment from the Hudson Solo step to the incubation step at a specified Liconic ID
+    #         print("Starting T0 Readnig")
+    #         T0_Reading(liconic_id)
+    #         print("Finished T0 Reading")
+    #         #Add the time of the incubation start to the array of 96 well plates that are currently in the incubator
+    #         incubation_start_times.append(round(time.time()))
+    #         #Since an iteration has now passed (the plate is in the incubator), increase the index of incubation iterations
+    #         iterations = iterations + 1
+    #         #Debug Log
+    #         print("Completed Iterations: ", iterations, " ... Start Times: " , incubation_start_times)
+    #         #Based on the total number of completed incubation iterations, determine what needs to be disposed of from the experimental setup.
+    #         if(iterations % 2 == 0):
+    #             print("Starting Disposal")
+    #             dispose(iterations)
+    #             print("Ending Disposal")
+    #     #Check to see if delta current time and the time at which the well plate currently incubating longest exceeds the incubation time.
+    #     if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+    #         #Debug Log
+    #         print("Finishing Up Experiment ", removals, ": Ending Loop")
+    #         #Calcuate the ID of the 96 well plate needed for removal from the incubator based on the number of plates that have already been removed.
+    #         liconic_id = removals + 1
+    #         #Complete the experiment starting from the removal of the 96 well plate at the specified incubation ID and ending at a Hidex T12 Reading.
+    #         print("Starting T12 Reading")
+    #         T12_Reading(liconic_id)
+    #         print("Ending T12 Reading")
+    #         #Remove the incubation start time of the plate that was just read from the array to update the new longest incubating well plate
+    #         incubation_start_times.pop(0)
+    #         #Increase the total number of removals that have now occurred.
+    #         removals = removals + 1
 
 
 def dispose(completed_iterations):
@@ -213,11 +215,11 @@ def dispose(completed_iterations):
     if(stack_type == 4):
         disposal_index = "LidNest3"
     #Add the disposal index to the payload
-    disposal_payload={
+    payload={
         'disposal_location':  disposal_index,    
         }
     #Run the despose Yaml File with the dedicated disposal location
-    run_WEI(DISPOSE_BOX_PLATE_FILE_PATH, disposal_payload, False)
+    run_WEI(DISPOSE_BOX_PLATE_FILE_PATH, payload, False)
     if(stack_type % 3 == 0):
     #If the Stack Type is a multiple of 3 (6 complete iterations of the Hudson experiment have occurred), dispose of the growth media deep well plate
         run_WEI(DISPOSE_GROWTH_MEDIA_FILE_PATH, None, False)
