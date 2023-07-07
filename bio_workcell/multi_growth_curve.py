@@ -20,10 +20,6 @@ import os
 
 #from rpl_wei.wei_workcell_base import WEI
 
-EXPERIMENT_ITERATIONS = 6
-INCUBATION_TIME_HOURS = 0.05
-INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
-INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
 ORIGINAL_ANTIBIOTIC_CONCENTRATION = [1]
 ORIGINAL_CELL_CONCENTRATION = [1]
 CULTURE_PAYLOAD = []
@@ -128,8 +124,9 @@ def determine_payload_from_excel():
     print(path_name)
     workbook = openpyxl.load_workbook(filename=path_name)
     worksheet = workbook['Complete_Run_Layout']
-    EXPERIMENT_ITERATIONS = worksheet['B1'].value
-    INCUBATION_TIME_HOURS = worksheet['E1'].value
+    experiment_iterations = worksheet['B1'].value
+    incubation_time_hours = worksheet['E1'].value
+    incubation_time_seconds = incubation_time_hours * 3600
     added_items = 0
     for i in range(2,13):
         column_letter = chr(ord('@')+i)
@@ -140,14 +137,10 @@ def determine_payload_from_excel():
             MEDIA_PAYLOAD.append(worksheet[media_type_cell_id].value)
             CULTURE_PAYLOAD.append(worksheet[culture_type_cell_id].value) 
             added_items = added_items + 1
-    if(len(MEDIA_PAYLOAD) != EXPERIMENT_ITERATIONS):
-        EXPERIMENT_ITERATIONS = len(MEDIA_PAYLOAD)
-    print("Media Payload " , MEDIA_PAYLOAD)
-    print("Culture Payload ", CULTURE_PAYLOAD)
-    print("Experiment Iterations ", EXPERIMENT_ITERATIONS)
-    print("Incubation Time (Hours) ", INCUBATION_TIME_HOURS)
-    print("Incubation Time (Seconds) ", INCUBATION_TIME_SECONDS)
-
+    if(len(MEDIA_PAYLOAD) != experiment_iterations):
+        experiment_iterations = len(MEDIA_PAYLOAD)
+    
+    return experiment_iterations, incubation_time_seconds
 
 def train_model():
     WeIGHT = .5
@@ -155,18 +148,19 @@ def train_model():
 def save_model():
     STRING_PATH_URL = ''
 
-def run_experiment(): 
+def run_experiment(total_iterations, incubation_time_sec): 
     iterations = 0
     removals = 0
     incubation_start_times = []
+    print("Total Experimental Runs ", total_iterations)
     print("Current Iteration Variable: ", iterations)
-    print("Total Iterations: ", EXPERIMENT_ITERATIONS)
-    #The experiment will run until all of the plates are used (indicated by iterations < EXPERIMENT_ITERATIONS) and there are no more plates in the incubator (indicated by len(incubation_start_times) != 0)
-    # while(iterations < EXPERIMENT_ITERATIONS or len(incubation_start_times) != 0):
+    print("Total Iterations: ", incubation_time_sec)
+    # The experiment will run until all of the plates are used (indicated by iterations < total_iterations) and there are no more plates in the incubator (indicated by len(incubation_start_times) != 0)
+    # while(iterations < total_iterations or len(incubation_start_times) != 0):
     #     #Debug Log
     #     print("Starting Experiment ", iterations, ": Started Loop")
-    #     #Check to see if there are any more plates to run, indicated by EXPERIMENT_ITERATIONS
-    #     if(iterations < EXPERIMENT_ITERATIONS):
+    #     #Check to see if there are any more plates to run, indicated by total_iterations
+    #     if(iterations < total_iterations):
     #         #Set up the experiment based on the number of iterations passed.
     #         setup(iterations)
     #         #Calculate the ID of the plate needed for incubation based on the number of iterations that have passed
@@ -187,7 +181,7 @@ def run_experiment():
     #             dispose(iterations)
     #             print("Ending Disposal")
     #     #Check to see if delta current time and the time at which the well plate currently incubating longest exceeds the incubation time.
-    #     if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
+    #     if(round(time.time()) - incubation_start_times[0] > incubation_time_sec):
     #         #Debug Log
     #         print("Finishing Up Experiment ", removals, ": Ending Loop")
     #         #Calcuate the ID of the 96 well plate needed for removal from the incubator based on the number of plates that have already been removed.
@@ -362,8 +356,8 @@ def run_WEI(file_location, payload_class, Hidex_Used):
 
 if __name__ == "__main__":
     #main()
-    determine_payload_from_excel()
-    run_experiment()
+    iteration_runs, incubation_time = determine_payload_from_excel()
+    run_experiment(iteration_runs, incubation_time)
 
 #!/usr/bin/env python3
 
