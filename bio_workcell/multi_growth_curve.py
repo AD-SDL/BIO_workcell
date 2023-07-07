@@ -13,6 +13,7 @@ import pathlib
 import openpyxl
 import tensorflow as tf
 from tensorflow import keras
+import numpy as np
 import os
 
 from rpl_wei import Experiment
@@ -20,9 +21,11 @@ from rpl_wei import Experiment
 #from rpl_wei.wei_workcell_base import WEI
 
 EXPERIMENT_ITERATIONS = 1
-INCUBATION_TIME_HOURS = 0.1
+INCUBATION_TIME_HOURS = 0.05
 INCUBATION_TIME_MINUTES = INCUBATION_TIME_HOURS *  60
 INCUBATION_TIME_SECONDS = INCUBATION_TIME_MINUTES * 60
+ORIGINAL_ANTIBIOTIC_CONCENTRATION = [1]
+ORIGINAL_CELL_CONCENTRATION = [1]
 CULTURE_PAYLOAD = []
 MEDIA_PAYLOAD = []
 
@@ -73,10 +76,46 @@ def load_model():
         TENSORFLOW_MODEL.summary()
     
 def predict_experiment():
-    antibiotic_wells = []
-    cell_wells = []
-    plate_ids = []
-    return antibiotic_wells, cell_wells, plate_ids
+    predictions = []
+    combinations = []
+
+    search_space = {}
+
+    for i in range (0,12):
+        treatment_key = 'antibiotic' + str(int(i+1))
+        culture_key = 'cell' + str(int(i+1))
+        treatment_values = []
+        for j in range(1,6):
+            treatment_values.append(ORIGINAL_ANTIBIOTIC_CONCENTRATION[i]/2**j)
+        treatment_values.append(0)
+
+        # Define other input variables and their search ranges
+
+    # Iterate over antibiotics and cells separately
+    antibiotics = [key for key in search_space if 'antibiotic' in key]
+    cells = [key for key in search_space if 'cell' in key]
+
+    for antibiotic in antibiotics:
+        for cell in cells:
+            # Generate potential combination between the antibiotic and cell
+            combination_antibiotic = search_space[antibiotic]
+            combination_cell = search_space[cell]
+            combination = {antibiotic: combination_antibiotic, cell: combination_cell}
+            combinations.append(combination)
+
+            # Make prediction on the combination using the trained model
+            prediction = TENSORFLOW_MODEL.predict(np.array(list(combination.values())).T)
+            predictions.append(prediction)
+
+    # Sort the combinations based on predicted growth rates
+    sorted_combinations = sorted(zip(combinations, predictions), key=lambda x: x[1])
+
+    # Select the top 12 combinations with lower growth rates
+    selected_combinations = sorted_combinations[:12]
+
+    # Print the selected combinations and their predicted growth rates
+    for combination, growth_rate in selected_combinations:
+        print(f"Combination: {combination} | Predicted Growth Rate: {growth_rate}")
 
 def determine_payload_from_excel():
     print("Run Log Starts Now")
@@ -103,8 +142,11 @@ def determine_payload_from_excel():
             added_items = added_items + 1
     if(len(MEDIA_PAYLOAD) != EXPERIMENT_ITERATIONS):
         EXPERIMENT_ITERATIONS = len(MEDIA_PAYLOAD)
-    print(MEDIA_PAYLOAD)
-    print(EXPERIMENT_ITERATIONS)
+    print("Media Payload " , MEDIA_PAYLOAD)
+    print("Culture Payload ", CULTURE_PAYLOAD)
+    print("Experiment Iterations ", EXPERIMENT_ITERATIONS)
+    print("Incubation Time (Hours) ", INCUBATION_TIME_HOURS)
+    print("Incubation Time (Seconds) ", INCUBATION_TIME_SECONDS)
 
 
 def train_model():
@@ -128,7 +170,9 @@ def run_experiment():
             #Calculate the ID of the plate needed for incubation based on the number of iterations that have passed
             liconic_id = iterations + 1
             #Run the experiment from the Hudson Solo step to the incubation step at a specified Liconic ID
+            print("Starting T0 Readnig")
             T0_Reading(liconic_id)
+            print("Finished T0 Reading")
             #Add the time of the incubation start to the array of 96 well plates that are currently in the incubator
             incubation_start_times.append(round(time.time()))
             #Since an iteration has now passed (the plate is in the incubator), increase the index of incubation iterations
@@ -137,7 +181,9 @@ def run_experiment():
             print("Completed Iterations: ", iterations, " ... Start Times: " , incubation_start_times)
             #Based on the total number of completed incubation iterations, determine what needs to be disposed of from the experimental setup.
             if(iterations % 2 == 0):
+                print("Starting Disposal")
                 dispose(iterations)
+                print("Ending Disposal")
         #Check to see if delta current time and the time at which the well plate currently incubating longest exceeds the incubation time.
         if(round(time.time()) - incubation_start_times[0] > INCUBATION_TIME_SECONDS):
             #Debug Log
@@ -145,7 +191,9 @@ def run_experiment():
             #Calcuate the ID of the 96 well plate needed for removal from the incubator based on the number of plates that have already been removed.
             liconic_id = removals + 1
             #Complete the experiment starting from the removal of the 96 well plate at the specified incubation ID and ending at a Hidex T12 Reading.
+            print("Starting T12 Reading")
             T12_Reading(liconic_id)
+            print("Ending T12 Reading")
             #Remove the incubation start time of the plate that was just read from the array to update the new longest incubating well plate
             incubation_start_times.pop(0)
             #Increase the total number of removals that have now occurred.
@@ -165,11 +213,11 @@ def dispose(completed_iterations):
     if(stack_type == 4):
         disposal_index = "LidNest3"
     #Add the disposal index to the payload
-    payload={
+    disposal_payload={
         'disposal_location':  disposal_index,    
         }
     #Run the despose Yaml File with the dedicated disposal location
-    run_WEI(DISPOSE_BOX_PLATE_FILE_PATH, payload, False)
+    run_WEI(DISPOSE_BOX_PLATE_FILE_PATH, disposal_payload, False)
     if(stack_type % 3 == 0):
     #If the Stack Type is a multiple of 3 (6 complete iterations of the Hudson experiment have occurred), dispose of the growth media deep well plate
         run_WEI(DISPOSE_GROWTH_MEDIA_FILE_PATH, None, False)
@@ -178,12 +226,12 @@ def setup(iteration_number):
     #If currently on an even number of iterations, add a tip box, serial dilution plate, and 96 well plate to the experiment.
     if(iteration_number % 2 == 0):
         #Identify the Tip Box Position Index, so it can be refilled on the Hudson Client
-        complete_payload={
+        complete_setup_payload={
                 'tip_box_position': 3,
             }
         #Run the Yaml file that outlines the setup procedure for the tip box, serial dilution plate, and 96 well plate.
         print("Starting Complete Hudson Setup")
-        run_WEI(COMPLETE_HUDSON_SETUP_FILE_PATH, complete_payload, False)
+        run_WEI(COMPLETE_HUDSON_SETUP_FILE_PATH, complete_setup_payload, False)
         print("Finished Complete Setup")
         #If currently on a number of iterations that is a factor of 6, add a growth media plate to the experiment as well
         if(iteration_number % 6 == 0):
@@ -193,12 +241,12 @@ def setup(iteration_number):
             plateCrane_readable_index = "LidNest" + str(int(LidNest_index))
             print("LidNest Being Used: ", plateCrane_readable_index)
             #Add the LidNest Index to the payload
-            payload={
+            lidnest_payload={
                 'lidnest_index':  plateCrane_readable_index,
             }
             #Run the Yaml file that outlines the setup procedure for the growth media plate
             print("Starting Growth Media Setup")
-            run_WEI(SETUP_GROWTH_MEDIA_FILE_PATH, payload, False)
+            run_WEI(SETUP_GROWTH_MEDIA_FILE_PATH, lidnest_payload, False)
             print("Finished Growth Media Setup!")
     #If currently on an even number of iterations, add a 96 well plate to the experiment.
     else: 
@@ -296,17 +344,19 @@ def run_WEI(file_location, payload_class, Hidex_Used):
 
     run_info = flow_status["result"]
     run_info["run_dir"] = Path(run_info["run_dir"])
+    print(run_info)
 
-    # if Hidex_Used:
-    #     print(run_info)
-    #     hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
-    #     hidex_file_path = hidex_file_path.replace('\\', '/')
-    #     hidex_file_path = hidex_file_path.replace("C:/", "/C/")
-    #     flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-    #     fname = flow_title.name
-    #     flow_title = flow_title.parents[0]
+    if Hidex_Used:
+        print("Starting Up Hidex")
+        hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
+        hidex_file_path = hidex_file_path.replace('\\', '/')
+        hidex_file_path = hidex_file_path.replace("C:/", "/C/")
+        flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
+        fname = flow_title.name
+        flow_title = flow_title.parents[0]
 
-    #     c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
+        c2_flow("hidex_test", str(fname.split('.')[0]), hidex_file_path, flow_title, fname, exp)
+        print("Finished Uplodaing to Globus")
 
 if __name__ == "__main__":
     #main()
