@@ -18,7 +18,7 @@ flowdef:
     module: plateCrane
     command: transfer
     args:
-      source: lidnest_payload.lidnest_index
+      source: payload.lidnest_index
       target: "PeelerNest"
       source_type: "stack"
       target_type: "module"

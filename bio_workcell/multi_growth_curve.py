@@ -226,12 +226,12 @@ def setup(iteration_number):
     #If currently on an even number of iterations, add a tip box, serial dilution plate, and 96 well plate to the experiment.
     if(iteration_number % 2 == 0):
         #Identify the Tip Box Position Index, so it can be refilled on the Hudson Client
-        complete_setup_payload={
-                'tip_box_position': 3,
+        payload={
+                'tip_box_position': "3",
             }
         #Run the Yaml file that outlines the setup procedure for the tip box, serial dilution plate, and 96 well plate.
         print("Starting Complete Hudson Setup")
-        run_WEI(COMPLETE_HUDSON_SETUP_FILE_PATH, complete_setup_payload, False)
+        run_WEI(COMPLETE_HUDSON_SETUP_FILE_PATH, payload, False)
         print("Finished Complete Setup")
         #If currently on a number of iterations that is a factor of 6, add a growth media plate to the experiment as well
         if(iteration_number % 6 == 0):
@@ -241,12 +241,12 @@ def setup(iteration_number):
             plateCrane_readable_index = "LidNest" + str(int(LidNest_index))
             print("LidNest Being Used: ", plateCrane_readable_index)
             #Add the LidNest Index to the payload
-            lidnest_payload={
+            payload={
                 'lidnest_index':  plateCrane_readable_index,
             }
             #Run the Yaml file that outlines the setup procedure for the growth media plate
             print("Starting Growth Media Setup")
-            run_WEI(SETUP_GROWTH_MEDIA_FILE_PATH, lidnest_payload, False)
+            run_WEI(SETUP_GROWTH_MEDIA_FILE_PATH, payload, False)
             print("Finished Growth Media Setup!")
     #If currently on an even number of iterations, add a 96 well plate to the experiment.
     else: 

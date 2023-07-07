@@ -84,6 +84,6 @@ flowdef:
     module: solo
     command: refill_tips
     args:
-      position: complete_setup_payload.tip_box_position
+      position: payload.tip_box_position
     checks: null
     comment: Reset Tip Box Number to 96 Tips
