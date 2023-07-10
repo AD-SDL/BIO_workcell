@@ -11,8 +11,8 @@ from pathlib import Path
 import pandas as pd 
 import pathlib
 import openpyxl
-# import tensorflow as tf
-# from tensorflow import keras
+import tensorflow as tf
+from tensorflow import keras
 import numpy as np
 import os
 
@@ -99,9 +99,9 @@ def predict_experiment():
             combination = {antibiotic: combination_antibiotic, cell: combination_cell}
             combinations.append(combination)
 
-            # Make prediction on the combination using the trained model
-            prediction = TENSORFLOW_MODEL.predict(np.array(list(combination.values())).T)
-            predictions.append(prediction)
+    # Make prediction on the combination using the trained model
+    prediction = TENSORFLOW_MODEL.predict(np.array(list(combination.values())).T)
+    predictions.append(prediction)
 
     # Sort the combinations based on predicted growth rates
     sorted_combinations = sorted(zip(combinations, predictions), key=lambda x: x[1])
