@@ -8,6 +8,8 @@ from pathlib import Path
 from tools.hudson_solo_auxillary.hso_functions import package_hso
 from tools.hudson_solo_auxillary import solo_step1, solo_step2, solo_step3
 from rpl_wei import Experiment
+from excel_payload_import import create_payload
+
 import time
 
 
@@ -26,27 +28,25 @@ def main():
     exp = Experiment("127.0.0.1", "8000", "Multi_GC_350")
     exp.register_exp()
 
-    # TODO: Excel parsing with checks on input values
-        # - are the lists equal length
-        # - format lists for payload
-        # - separate variable for number of assay plates to create
+    #EXCEL PARSING:
+    payload = create_payload()
 
     num_assay_plates = 12
 
     # Initial payload setup
-    payload = {
-        "temp": 37.0, #a float value setting the temperature of the Liconic Incubator (in Celsius) 
-        "humidity": 95.0, # a float value setting the humidity of the Liconic Incubator
-        "shaker_speed": 30, #an integer value setting the shaker speed of the Liconic Incubator
-        # "stacker": 1, # an integer value specifying which stacker a well plate should be used in (Preferable to use "incubation_plate_id" : plate_id, where plate_id is an integer 1-88 - stacker and slot will be autocalculated)
-        # "slot": 2, # an integer value specifying which slot a well plate should be used in (Preferable to use "incubation_plate_id" : plate_id, where plate_id is an integer 1-88 - stacker and slot will be autocalculated)
-        "treatment": ["col1" ,"col2", "col3", "col4", "col4","col5" ,"col6", "col7", "col8", "col9", "col10", "col11", "col12"],  # string of treatment name. Ex. "col1", "col2"
-        "culture_column": [1,2,3,4,5,6,7,8,9,10,11,12],  # what column of the culture stock plate to use for each assay plate
-        "culture_dil_column": [1,2,3,4,5,6,7,8,9,10,11,12],  # int of dilution column for 1:10 culture dilutions. Ex. 1, 2, 3, etc.
-        "media_start_column": [1,3,5,7,9,11,1,3,5,7,9,11],  # int of column to draw media from (requires 2 columns, 1 means columns 1 and 2) Ex. 1, 3, 5, etc.
-        "treatment_dil_half": [1,2,1,2,1,2,1,2,1,2,1,2],  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2.
-        "tip_box_position": "1", # string of an integer 1-8 that identifies the position of the tip box when it is being refilled
-    }
+    # payload = {
+    #     "temp": 37.0, #a float value setting the temperature of the Liconic Incubator (in Celsius) 
+    #     "humidity": 95.0, # a float value setting the humidity of the Liconic Incubator
+    #     "shaker_speed": 30, #an integer value setting the shaker speed of the Liconic Incubator
+    #     # "stacker": 1, # an integer value specifying which stacker a well plate should be used in (Preferable to use "incubation_plate_id" : plate_id, where plate_id is an integer 1-88 - stacker and slot will be autocalculated)
+    #     # "slot": 2, # an integer value specifying which slot a well plate should be used in (Preferable to use "incubation_plate_id" : plate_id, where plate_id is an integer 1-88 - stacker and slot will be autocalculated)
+    #     "treatment": ["col1" ,"col2", "col3", "col4", "col4","col5" ,"col6", "col7", "col8", "col9", "col10", "col11", "col12"],  # string of treatment name. Ex. "col1", "col2"
+    #     "culture_column": [1,2,3,4,5,6,7,8,9,10,11,12],  # what column of the culture stock plate to use for each assay plate
+    #     "culture_dil_column": [1,2,3,4,5,6,7,8,9,10,11,12],  # int of dilution column for 1:10 culture dilutions. Ex. 1, 2, 3, etc.
+    #     "media_start_column": [1,3,5,7,9,11,1,3,5,7,9,11],  # int of column to draw media from (requires 2 columns, 1 means columns 1 and 2) Ex. 1, 3, 5, etc.
+    #     "treatment_dil_half": [1,2,1,2,1,2,1,2,1,2,1,2],  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2.
+    #     "tip_box_position": "1", # string of an integer 1-8 that identifies the position of the tip box when it is being refilled
+    # }
 
     # Lopping to create assay plates
 
