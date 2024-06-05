@@ -1,0 +1,118 @@
+name: Adaptive_Lab_Evolution - Workflow 1
+
+metadata:
+  author: Casey Stone, Abe Stroka, and Nidhi Gupta
+  info: Initial Adaptive_Lab_Evolution workflow for BIO workcell
+  version: 0.1
+
+modules:
+  - name: solo
+
+flowdef:
+  - name: Refill Tips
+    module: solo
+    action: refill_tips
+    args:
+      position: payload.tip_box_position
+    checks: null
+    comment: Reset Tip Box Number to 96 Tips
+
+  - name: Substrates transfer to Position2 plate
+    module: solo
+    action: run_protocol
+    args:
+      hso_contents: payload.hso_1
+      hso_num_lines: payload.hso_1_lines
+      hso_basename: payload.hso_1_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+  - name: Inoculate column1 at Position2
+    module: solo
+    action: run_protocol
+    args:
+      hso_contents: payload.hso_2
+      hso_num_lines: payload.hso_2_lines
+      hso_basename: payload.hso_2_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+  - name: Open Hidex
+    module: hidex
+    action: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from Solo Position2 to Hidex Nest
+    module: platecrane
+    action: transfer
+    args:
+      source: "Solo.Position2"
+      target: "Hidex.Nest"
+      source_type: "stack"
+      target_type: "module"      
+      height_offset: "700"
+    checks: null
+    comment: Place plate to Hidex Nest
+
+  - name: run Hidex
+    module: hidex
+    action: run_assay
+    args: 
+      assay_name: "Campaign2_wei_cs"
+    checks: null
+    comment: Run protocol at hidex
+
+  - name: Open Hidex
+    module: hidex
+    action: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from Hidex Nest to Liconic Nest
+    module: platecrane
+    action: transfer
+    args:
+      source: "Hidex.Nest"
+      target: "Liconic.Nest"
+      source_type: "module"
+      target_type: "stack"   
+    checks: null
+    comment: Place plate onto Liconic Nest
+
+  - name: Close Hidex
+    module: hidex
+    action: close
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Close Hidex Gate
+
+  - name: Close the lid
+    module: platecrane
+    action: replace_lid
+    args: 
+      source: "LidNest1"
+      target: "Liconic.Nest"
+    comment: Close the plate
+
+  - name: Load Liconic
+    module: liconic
+    action: load_plate
+    args: 
+      plate_id: payload.plate_id
+    checks: null
+    comment: Stage microtitre plate
+
+  - name: Start shaker at set speed
+    module: liconic
+    action: begin_shake
+    args: 
+      shaker_speed: payload.shaker_speed
+    checks: null
+    comment: Stage Biolog plates
+
