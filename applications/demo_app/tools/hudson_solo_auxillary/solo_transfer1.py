@@ -58,8 +58,8 @@ def generate_hso_file(
     soloSoft = SoloSoft(
         filename=temp_file_path,
         plateList=[
-            "Empty",
-            "DeepBlock.96.VWR-75870-792.sterile",       # substrate stock plate
+            "Plate.96.Corning-3635.ClearUVAssay",
+            "Plate.96.Corning-3635.ClearUVAssay",       # substrate stock plate
             "TipBox.180uL.Axygen-EVF-180-R-S.bluebox",  # 180 uL tip box
             "Plate.96.Corning-3635.ClearUVAssay",       # substrate replicate plate
             "Plate.96.Corning-3635.ClearUVAssay",       # substrate replicate plate
@@ -73,19 +73,20 @@ def generate_hso_file(
     soloSoft.getTip("Position3")  
 
     soloSoft.aspirate(
-        position="Position4",
+        position="Position2",
         aspirate_volumes=Plate_96_Corning_3635_ClearUVAssay().setColumn(
             1, substrate_transfer_volume
         ),
-        aspirate_shift=[0, 0, media_z_shift],
+        aspirate_shift=[0, 0, flat_bottom_z_shift],
     )
     soloSoft.dispense(
-        position="Position4",
+        position="Position2",
         dispense_volumes=Plate_96_Corning_3635_ClearUVAssay().setColumn(
             12, substrate_transfer_volume
         ),
-        dispense_shift=[0, 0, media_z_shift],
+        dispense_shift=[0, 0, flat_bottom_z_shift],
     )
+
     
     # * Dispense tips at end of protocol and process these instructions into a .hso file 
     soloSoft.shuckTip()

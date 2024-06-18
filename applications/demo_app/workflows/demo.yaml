@@ -1,4 +1,4 @@
-name: Growth Curve - Workflow
+name: Demo - Workflow
 
 metadata:
   author: Casey Stone, Rafael Vescovi
@@ -7,34 +7,39 @@ metadata:
 
 modules:
   - name: solo
-  - name: peeler
+  - name: platecrane
+  - name: hidex
   - name: sealer
-  - name: plateEx
-  - name: camera
+  - name: peeler
+  - name: liconic
 
 flowdef:
-<<<<<<< Updated upstream
-  - name: Move plate from Stack5 to Solo Position4
-    module: plateCrane
+  - name: Move plate from Stack1 to Solo.Position2
+    module: platecrane
     action: transfer
     args:
-      source: "Stack5"
-      target: "Solo.Position4"
-      source_type: "stack"
-      target_type: "stack"
-      plate_type: "96_well"
+      source: "Stack1"
+      target: "Solo.Position2"
+      plate_type: "flat_bottom_96well" 
     checks: null
-    comment: Place plate in Solo Position4
+    comment: Place plate in Solo Position2
 
-  - name: Remove lid
-    module: plateCrane
+  - name: Remove lid    
+    module: platecrane
     action: remove_lid
     args:
-      source: "Solo.Position4"
-      target: "Stack2"
-      plate_type: "96_well"
-    checks: null
+      source: "Solo.Position2"
+      target: "LidNest1"
+      plate_type: "flat_bottom_96well"
     comment: Place plate lid on lid nest 2
+  
+  - name: Move platecrane to Safe location
+    module: platecrane
+    action: move_safe
+    args:
+      foo: "bar"
+    checks: null
+    comment: Move platecrane out of the way of SOLO arm
   
   - name: Refill Tips
     module: solo
@@ -43,43 +48,11 @@ flowdef:
       position: payload.tip_box_position
     checks: null
     comment: Reset Tip Box Number to 96 Tips
-=======
-  # - name: Move plate from Stack5 to Solo Position4
-  #   module: platecrane
-  #   action: transfer
-  #   args:
-  #     source: "Stack5"
-  #     target: "Solo.Position4"
-  #     source_type: "stack"
-  #     target_type: "stack"
-  #     plate_type: "96_well"
-  #   checks: null
-  #   comment: Place plate in Solo Position4
 
-  # - name: Remove lid
-  #   module: platecrane
-  #   action: remove_lid
-  #   args:
-  #     source: "Solo.Position4"
-  #     target: "Stack2"
-  #     plate_type: "96_well"
-  #   checks: null
-  #   comment: Place plate lid on lid nest 2
-  
-  # - name: Refill Tips
-  #   module: solo
-  #   action: refill_tips
-  #   args:
-  #     position: payload.tip_box_position
-  #   checks: null
-  #   comment: Reset Tip Box Number to 96 Tips
->>>>>>> Stashed changes
-
-    # STEP 1
+   # STEP 1
   - name: Mix Reactions
     module: solo
     action: run_protocol
-<<<<<<< Updated upstream
     args:
       hso_contents: payload.hso_1
       hso_num_lines: payload.hso_1_lines
@@ -95,15 +68,14 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from Solo Position4 to Hidex Nest
-    module: plateCrane
+  - name: Move plate from Solo Position2 to Hidex Nest
+    module: platecrane
     action: transfer
     args:
-      source: "Solo.Position4"
-      target: "HidexNest2"
-      source_type: "module"
-      target_type: "module"      
-      height_offset: "700"
+      source: "Solo.Position2"
+      target: "Hidex.Nest"      
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: null
     comment: Place plate to Hidex Nest
 
@@ -123,15 +95,14 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from HidexNest to Sealer
-    module: plateCrane
+  - name: Move plate from Hidex.Nest to Sealer
+    module: platecrane
     action: transfer
     args:
-      source: "HidexNest2"
-      target: "SealerNest"
-      source_type: "module"
-      target_type: "module"  
-      height_offset: "650"
+      source: "Hidex.Nest"
+      target: "Sealer.Nest"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: null
     comment: Place plate to Sealer
 
@@ -143,7 +114,7 @@ flowdef:
     checks: null
     comment: Close Hidex Gate
 
-  - name: Seal PCR plate
+  - name: Seal plate
     module: sealer
     action: seal
     args:
@@ -153,92 +124,14 @@ flowdef:
     comment: nullassay_name
 
   - name: Move plate from Sealer to Liconic
-    module: plateCrane
+    module: platecrane
     action: transfer
-=======
->>>>>>> Stashed changes
     args:
-      hso_contents: payload.hso_1
-      hso_num_lines: payload.hso_1_lines
-      hso_basename: payload.hso_1_basename
-    checks: RESOURCE_CHECK
-    comment: resource check not implemented, but will be
-
-  # - name: Open Hidex
-  #   module: hidex
-  #   action: open
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Open Hidex Gate
-
-  # - name: Move plate from Solo Position4 to Hidex Nest
-  #   module: platecrane
-  #   action: transfer
-  #   args:
-  #     source: "Solo.Position4"
-  #     target: "HidexNest2"
-  #     source_type: "module"
-  #     target_type: "module"      
-  #     height_offset: "700"
-  #   checks: null
-  #   comment: Place plate to Hidex Nest
-
-  # - name: Close Hidex
-  #   module: hidex
-  #   action: close
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Close Hidex Gate
-
-  # - name: Open Hidex
-  #   module: hidex
-  #   action: open
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Open Hidex Gate
-
-  # - name: Move plate from HidexNest to Sealer
-  #   module: platecrane
-  #   action: transfer
-  #   args:
-  #     source: "HidexNest2"
-  #     target: "SealerNest"
-  #     source_type: "module"
-  #     target_type: "module"  
-  #     height_offset: "650"
-  #   checks: null
-  #   comment: Place plate to Sealer
-
-  # - name: Close Hidex
-  #   module: hidex
-  #   action: close
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Close Hidex Gate
-
-  # - name: Seal PCR plate
-  #   module: sealer
-  #   action: seal
-  #   args:
-  #     time: payload:seal.time
-  #     temperature: 175
-  #   checks: null
-  #   comment: nullassay_name
-
-  # - name: Move plate from Sealer to Liconic
-  #   module: platecrane
-  #   action: transfer
-  #   args:
-  #     source: "SealerNest"
-  #     target: "Liconic.Nest"
-  #     source_type: "module"
-  #     target_type: "stack"   
-  #   checks: null
-  #   comment: Place plate onto Liconic
+      source: "Sealer.Nest"
+      target: "Liconic.Nest"
+      plate_type: "flat_bottom_96well"
+    checks: null
+    comment: Place plate onto Liconic
 
   - name: Load Liconic
     module: liconic
@@ -256,9 +149,6 @@ flowdef:
     checks: null
     comment: Stage pcr plates
 
-
-    # end step 1
-
   - name: Unload Liconic
     module: liconic
     action: unload_plate
@@ -267,39 +157,24 @@ flowdef:
     checks: null
     comment: Stage pcr plates
       
-<<<<<<< Updated upstream
   - name: Move plate from Liconic to Peeler
-    module: plateCrane
+    module: platecrane
     action: transfer
     args:
       source: "Liconic.Nest"
-      target: "PeelerNest"
-      source_type: "stack"
-      target_type: "module"   
+      target: "Peeler.Nest"
+      plate_type: "flat_bottom_96well"
     checks: null
     comment: Place plate onto PeelerNest
-=======
-  # - name: Move plate from Liconic to Peeler
-  #   module: platecrane
-  #   action: transfer
-  #   args:
-  #     source: "Liconic.Nest"
-  #     target: "PeelerNest"
-  #     source_type: "stack"
-  #     target_type: "module"   
-  #   checks: null
-  #   comment: Place plate onto PeelerNest
->>>>>>> Stashed changes
   
-  # - name: Peel
-  #   module: peeler
-  #   action: peel
-  #   args:
-  #     test: null
-  #   checks: null
-  #   comment: null
+  - name: Peel
+    module: peeler
+    action: peel
+    args:
+      test: null
+    checks: null
+    comment: null
     
-<<<<<<< Updated upstream
   - name: Open Hidex
     module: hidex
     action: open
@@ -308,15 +183,14 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from PeelerNest to HidexNest
-    module: plateCrane
+  - name: Move plate from Peeler.Nest to Hidex.Nest
+    module: platecrane
     action: transfer
     args:
-      source: "PeelerNest"
-      target: "HidexNest2"
-      source_type: "module"
-      target_type: "module"  
-      height_offset: "700"
+      source: "Peeler.Nest"
+      target: "Hidex.Nest"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: nullpayload.stacker
     comment: Place plate in Hidex Nest
 
@@ -337,14 +211,13 @@ flowdef:
     comment: Open Hidex Gate
 
   - name: Move plate from HidexNest to Stack1
-    module: plateCrane
+    module: platecrane
     action: transfer
     args:
-      source: "HidexNest2"
-      target: "Stack1"
-      source_type: "module"
-      target_type: "stack"   
-      height_offset: "650"
+      source: "Hidex.Nest"
+      target: "Stack5"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: null
     comment: Place plate into trash Stack
 
@@ -355,62 +228,5 @@ flowdef:
       foo: "bar"
     checks: null
     comment: Close Hidex Gate
-=======
-  # - name: Open Hidex
-  #   module: hidex
-  #   action: open
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Open Hidex Gate
-
-  # - name: Move plate from PeelerNest to HidexNest
-  #   module: platecrane
-  #   action: transfer
-  #   args:
-  #     source: "PeelerNest"
-  #     target: "HidexNest2"
-  #     source_type: "module"
-  #     target_type: "module"  
-  #     height_offset: "700"
-  #   checks: nullpayload.stacker
-  #   comment: Place plate in Hidex Nest
-
-  # - name: Close Hidex
-  #   module: hidex
-  #   action: close
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Close Hidex Gate
-
-  # - name: Open Hidex
-  #   module: hidex
-  #   action: open
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Open Hidex Gate
-
-  # - name: Move plate from HidexNest to Stack1
-  #   module: platecrane
-  #   action: transfer
-  #   args:
-  #     source: "HidexNest2"
-  #     target: "Stack1"
-  #     source_type: "module"
-  #     target_type: "stack"   
-  #     height_offset: "650"
-  #   checks: null
-  #   comment: Place plate into trash Stack
-
-  # - name: Close Hidex
-  #   module: hidex
-  #   action: close
-  #   args: 
-  #     foo: "bar"
-  #   checks: null
-  #   comment: Close Hidex Gate
->>>>>>> Stashed changes
      
 
