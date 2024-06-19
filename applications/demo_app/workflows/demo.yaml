@@ -1,8 +1,8 @@
 name: Demo - Workflow
 
 metadata:
-  author: Casey Stone, Rafael Vescovi
-  info: Initial PCR workflow for RPL workcell
+  author: Casey Stone, Abraham Stroka 
+  info: Demonstration Workflow for BIO350 Workcell
   version: 0.1
 
 modules:
@@ -121,7 +121,7 @@ flowdef:
       time: payload:seal.time
       temperature: 175
     checks: null
-    comment: nullassay_name
+    comment: Seal the plate
 
   - name: Move plate from Sealer to Liconic
     module: platecrane
@@ -139,7 +139,7 @@ flowdef:
     args: 
       plate_id: "1"
     checks: null
-    comment: Stage pcr plates
+    comment: Load assay plate into Liconic
 
   - name: Start shaker at set speed
     module: liconic
@@ -191,7 +191,7 @@ flowdef:
       target: "Hidex.Nest"
       plate_type: "flat_bottom_96well"
       height_offset: 8
-    checks: nullpayload.stacker
+    checks: Transfer assay plate from Peeler to Hidex
     comment: Place plate in Hidex Nest
 
   - name: Close Hidex

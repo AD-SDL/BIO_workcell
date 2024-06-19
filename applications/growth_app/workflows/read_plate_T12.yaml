@@ -1,8 +1,8 @@
 name: Growth Curve - Workflow
 
 metadata:
-  author: Casey Stone, Rafael Vescovi
-  info: Initial PCR workflow for RPL workcell
+  author: Casey Stone, Abraham Stroka
+  info: read_plate_T12 Workflow for BIO350 growth_app application
   version: 0.1
 
 modules:
@@ -14,7 +14,6 @@ modules:
   - name: liconic
 
 flowdef:
-
   - name: Unload Liconic
     module: liconic
     action: unload_plate
@@ -24,13 +23,12 @@ flowdef:
     comment: Stage pcr plates
       
   - name: Move plate from Liconic to Peeler
-    module: plateCrane
+    module: platecrane
     action: transfer
     args:
       source: "Liconic.Nest"
       target: "Peeler.Nest"
-      source_type: "stack"
-      target_type: "stack"   
+      plate_type: "flat_bottom_96well"
     checks: null
     comment: Place plate onto PeelerNest
   
@@ -50,15 +48,14 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from PeelerNest to HidexNest
-    module: plateCrane
+  - name: Move plate from Peeler.Nest to Hidex.Nest
+    module: platecrane
     action: transfer
     args:
       source: "Peeler.Nest"
       target: "Hidex.Nest"
-      source_type: "stack"
-      target_type: "module"  
-      height_offset: "1300"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: nullpayload.stacker
     comment: Place plate in Hidex Nest
 
@@ -79,14 +76,13 @@ flowdef:
     comment: Open Hidex Gate
 
   - name: Move plate from HidexNest to Stack1
-    module: plateCrane
+    module: platecrane
     action: transfer
     args:
       source: "Hidex.Nest"
-      target: "Stack1"
-      source_type: "module"
-      target_type: "stack"   
-      height_offset: "650"
+      target: "Stack5"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: null
     comment: Place plate into trash Stack
 

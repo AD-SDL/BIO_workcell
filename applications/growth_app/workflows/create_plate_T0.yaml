@@ -14,40 +14,42 @@ modules:
   - name: liconic
 
 flowdef:
-  - name: Move tip bin from Stack4 to Solo Position1
-    module: plateCrane
-    action: transfer
-    args:
-      source: "Stack4"
-      target: "Solo.Position1"
-      source_type: "stack"
-      target_type: "stack"
-      plate_type: "tip_box_lid_off"
-    checks: null
-    comment: Place plate in Solo Position1
+  # - name: Move tip bin from Stack4 to Solo Position1
+  #   module: plateCrane
+  #   action: transfer
+  #   args:
+  #     source: "Stack4"
+  #     target: "Solo.Position1"
+  #     plate_type: "tip_box_lid_off"
+  #   checks: null
+  #   comment: Place plate in Solo Position1
 
-  - name: Move plate from Stack5 to Solo Position2
-    module: plateCrane
+  - name: Move plate from Stack1 to Solo.Position2
+    module: platecrane
     action: transfer
     args:
-      source: "Stack5"
+      source: "Stack1"
       target: "Solo.Position2"
-      source_type: "stack"
-      target_type: "stack"
-      plate_type: "96_well"
+      plate_type: "flat_bottom_96well" 
     checks: null
     comment: Place plate in Solo Position2
 
-  - name: Remove lid
-    module: plateCrane
+  - name: Remove lid    
+    module: platecrane
     action: remove_lid
     args:
       source: "Solo.Position2"
-      target: "Stack2"
-      plate_type: "96_well"
-      height_offset: -400
-    checks: null
+      target: "LidNest1"
+      plate_type: "flat_bottom_96well"
     comment: Place plate lid on lid nest 2
+  
+  - name: Move platecrane to Safe location
+    module: platecrane
+    action: move_safe
+    args:
+      foo: "bar"
+    checks: null
+    comment: Move platecrane out of the way of SOLO arm
   
   - name: Refill Tips
     module: solo
@@ -98,15 +100,14 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from Solo Position2 to Hidex Nest
-    module: plateCrane
+- name: Move plate from Solo Position2 to Hidex Nest
+    module: platecrane
     action: transfer
     args:
       source: "Solo.Position2"
-      target: "Hidex.Nest"
-      source_type: "module"
-      target_type: "module"      
-      height_offset: "1300"
+      target: "Hidex.Nest"      
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: null
     comment: Place plate to Hidex Nest
 
@@ -126,15 +127,14 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from HidexNest to Sealer
-    module: plateCrane
+  - name: Move plate from Hidex.Nest to Sealer
+    module: platecrane
     action: transfer
     args:
       source: "Hidex.Nest"
       target: "Sealer.Nest"
-      source_type: "module"
-      target_type: "stack"  
-      height_offset: "650"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
     checks: null
     comment: Place plate to Sealer
 
@@ -146,23 +146,22 @@ flowdef:
     checks: null
     comment: Close Hidex Gate
 
-  - name: Seal PCR plate
+  - name: Seal plate
     module: sealer
     action: seal
     args:
       time: payload:seal.time
       temperature: 175
     checks: null
-    comment: nullassay_name
+    comment: Seal the plate
 
   - name: Move plate from Sealer to Liconic
-    module: plateCrane
+    module: platecrane
     action: transfer
     args:
       source: "Sealer.Nest"
       target: "Liconic.Nest"
-      source_type: "stack"
-      target_type: "stack"   
+      plate_type: "flat_bottom_96well"
     checks: null
     comment: Place plate onto Liconic
 
@@ -172,7 +171,7 @@ flowdef:
     args: 
       plate_id: "1"
     checks: null
-    comment: Stage pcr plates
+    comment: Load assay plate into Liconic
 
   - name: Start shaker at set speed
     module: liconic
@@ -180,4 +179,4 @@ flowdef:
     args: 
       shaker_speed: payload.shaker_speed
     checks: null
-    comment: Stage pcr plates
+    comment: Shake the assay plate in Liconic
