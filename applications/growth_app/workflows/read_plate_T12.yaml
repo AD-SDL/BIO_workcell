@@ -28,9 +28,9 @@ flowdef:
     action: transfer
     args:
       source: "Liconic.Nest"
-      target: "PeelerNest"
+      target: "Peeler.Nest"
       source_type: "stack"
-      target_type: "module"   
+      target_type: "stack"   
     checks: null
     comment: Place plate onto PeelerNest
   
@@ -54,11 +54,11 @@ flowdef:
     module: plateCrane
     action: transfer
     args:
-      source: "PeelerNest"
-      target: "HidexNest2"
-      source_type: "module"
+      source: "Peeler.Nest"
+      target: "Hidex.Nest"
+      source_type: "stack"
       target_type: "module"  
-      height_offset: "700"
+      height_offset: "1300"
     checks: nullpayload.stacker
     comment: Place plate in Hidex Nest
 
@@ -82,7 +82,7 @@ flowdef:
     module: plateCrane
     action: transfer
     args:
-      source: "HidexNest2"
+      source: "Hidex.Nest"
       target: "Stack1"
       source_type: "module"
       target_type: "stack"   

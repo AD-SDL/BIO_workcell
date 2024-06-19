@@ -45,6 +45,7 @@ flowdef:
       source: "Solo.Position2"
       target: "Stack2"
       plate_type: "96_well"
+      height_offset: -400
     checks: null
     comment: Place plate lid on lid nest 2
   
@@ -102,10 +103,10 @@ flowdef:
     action: transfer
     args:
       source: "Solo.Position2"
-      target: "HidexNest2"
+      target: "Hidex.Nest"
       source_type: "module"
       target_type: "module"      
-      height_offset: "700"
+      height_offset: "1300"
     checks: null
     comment: Place plate to Hidex Nest
 
@@ -129,10 +130,10 @@ flowdef:
     module: plateCrane
     action: transfer
     args:
-      source: "HidexNest2"
-      target: "SealerNest"
+      source: "Hidex.Nest"
+      target: "Sealer.Nest"
       source_type: "module"
-      target_type: "module"  
+      target_type: "stack"  
       height_offset: "650"
     checks: null
     comment: Place plate to Sealer
@@ -158,9 +159,9 @@ flowdef:
     module: plateCrane
     action: transfer
     args:
-      source: "SealerNest"
+      source: "Sealer.Nest"
       target: "Liconic.Nest"
-      source_type: "module"
+      source_type: "stack"
       target_type: "stack"   
     checks: null
     comment: Place plate onto Liconic
