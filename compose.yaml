@@ -1,7 +1,6 @@
 name: b350_lab
 
 include:
-  - dashboard/dashboard.compose.yaml
   - frigate/bio-frigate.compose.yaml
 
 services:
@@ -9,7 +8,7 @@ services:
   # WEI Core Services #
   #####################
   b350_wc_server:
-    image: ghcr.io/ad-sdl/wei
+    image: ghcr.io/ad-sdl/wei:v0.5.9
     container_name: b350_wc_server
     ports:
       - 8000:8000
@@ -25,7 +24,7 @@ services:
     depends_on:
       - b350_redis
   b350_wc_engine:
-    image: ghcr.io/ad-sdl/wei
+    image: ghcr.io/ad-sdl/wei:v0.5.9
     container_name: b350_wc_engine
     volumes:
       - .:/workcell_defs
@@ -83,12 +82,16 @@ services:
   liconic_node:
     image: ghcr.io/ad-sdl/liconic_module
     container_name: liconic_node
+    environment:
+      - USER_ID=1000
+      - GROUP_ID=1000
     ports:
       - 2003:2003
-    command: python liconic_module/scripts/liconic_rest_node.py --port=2003 --device='/dev/ttyUSB0'
+    command: python liconic_module/scripts/liconic_rest_node.py --port=2003 --device='/dev/ttyUSB0' --resources_path='~/liconic_temp/resources/liconic_resources.json'
     privileged: true
     volumes:
       - /dev:/dev
+      - ~/liconic_temp:/home/app/liconic_temp
 
 ################
 # Data Storage #

@@ -5,7 +5,7 @@ import time
 
 # from rpl_wei.wei_workcell_base import WEI
 #from rpl_wei import Experiment
-#from wei import Experiment
+from wei import Experiment
 import wei
 
 from tools.hudson_solo_auxillary.hso_functions import package_hso
@@ -23,9 +23,10 @@ def main():
     # * Creates a WEI Experiment at port 8000 and registers the experiment with the title Substrate
     #exp = Experiment("127.0.0.1", "8000", "Demo")
     experiment = wei.ExperimentClient(
-        server_addr = "127.0.0.1",
+        server_host = "localhost",
         server_port = "8000",
-        experiment_name = "BIO350 Demo"
+        experiment_name = "BIO350_Demo",
+        description="Demonstration and testing application for the BIO350 Workcell."
     )
     #exp.register_exp()
 

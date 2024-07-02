@@ -37,9 +37,10 @@ def main():
     #Creates a WEI Experiment at the 8000 port and registers the experiment with the title Growth_Curve
  
     exp = wei.ExperimentClient(
-        server_addr = "127.0.0.1",
+        server_host = "127.0.0.1",
         server_port = "8000",
-        experiment_name = "growth_app "
+        experiment_name = "Growth_App",
+        description="Single plate growth curve assay."
     )
     #exp.register_exp()
 
