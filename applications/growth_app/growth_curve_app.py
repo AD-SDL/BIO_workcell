@@ -21,6 +21,7 @@ def main():
     bio_workcell_path = Path(__file__).parent.parent.parent
     app_dir = bio_workcell_path / "applications" / "growth_app"
     wf_dir = app_dir / "workflows"
+    
 
     # workflow paths
     T0_wf_path = wf_dir / "create_plate_T0.yaml"
@@ -84,9 +85,9 @@ def main():
     payload["hso_3_basename"] = hso_3_basename
 
     # Run the T0 Workflow on the Registered WEI Experiment with the payload specified above
-    flow_info = exp.run_job(T0_wf_path.resolve(), payload=payload, simulate=False)
+    run_info = exp.start_run(T0_wf_path.resolve(), payload=payload, simulate=False)
 
-    # # Pinging the status of the T0 Workflow sent to the WEI Experiment
+    # Pinging the status of the T0 Workflow sent to the WEI Experiment
     # flow_status = exp.query_job(flow_info["job_id"])
     # #Periodically checking the status every 3 seconds of the T0 Workflow until it is finished
     # while flow_status["status"] != "finished" and flow_status["status"] != "failure":
@@ -99,25 +100,33 @@ def main():
     # print(run_info)
 
     # Accessing the T0 Reading results file path from the Hidex # TODO: How do we do this now?
-    # hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
-    # # Formatting the File Path from Windows to be compatible with Linux file directory settings and creating a Path
+    hidex_file_name = run_info["hist"]["run Hidex"]["action_msg"]
+    output_dir = Path.home() / "runs" / run_info["experiment_id"]
+    output_dir.mkdir(parents=True, exist_ok=True)
+    exp.get_wf_result_file(run_id=run_info["run_id"], filename=hidex_file_name, output_filepath=output_dir / hidex_file_name)
+    # Formatting the File Path from Windows to be compatible with Linux file directory settings and creating a Path
     # hidex_file_path = hidex_file_path.replace('\\', '/')
     # hidex_file_path = hidex_file_path.replace("C:/", "/C/")
     # flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-    # # Accessing the File Name
+    # Accessing the File Name
     # fname = flow_title.name
+    # print("FILE NAME")
+    # print(fname)
     # # Accessing the File Path
     # flow_title = flow_title.parents[0]
+    # print("FILE PATH")
+    # print(flow_title)
+    
 
     #Uploading the Hidex Data to the Globus client and portal. The arguments in the function are the strings of the experiment name (exp_name), plate number (plate_n), time uploaded (time), the flow_title (local_path), and file name (fname), and the WEI Experiment Object).
     #c2_flow(exp_name = "T0_Reading", plate_n = "1", time = str(time.strftime("%H_%M_%S", time.localtime())), local_path=flow_title, fname = fname, exp = exp)
 
     # Incubate for 12 hours
-    print("Incubating plate for 12 hours")
-    time.sleep(43200)
+    # print("Incubating plate for 12 hours")
+    # time.sleep(43200)
 
     # Run the T12 Workflow on the Registered WEI Experiment with the payload specified above to read the plate after the 12 hour wait
-    flow_info = exp.run_job(T12_wf_path.resolve(), payload=payload, simulate=False)
+    # flow_info = exp.run_job(T12_wf_path.resolve(), payload=payload, simulate=False)
     
     # Pinging the status of the T0 Workflow sent to the WEI Experiment
     # flow_status = exp.query_job(flow_info["job_id"])
