@@ -8,7 +8,6 @@ from liquidhandling import Reservoir_12col_Agilent_201256_100_BATSgroup, Plate_9
  
 def generate_hso_file(
         payload, 
-        current_assay_plate_num,
         temp_file_path,
 ): 
     """generate_hso_file
@@ -26,21 +25,25 @@ def generate_hso_file(
     
     # extract payload variables
     try: 
-        treatment = payload['treatment'][current_assay_plate_num]
-        culture_column = payload['culture_column'][current_assay_plate_num]
-        culture_dil_column = payload['culture_dil_column'][current_assay_plate_num]
-        media_start_column = payload['media_start_column'][current_assay_plate_num]
-        treatment_dil_half = payload['treatment_dil_half'][current_assay_plate_num]
+        current_assay_plate_num = payload['current_assay_plate_num']
+        treatment_stock_column = payload['treatment_stock_column'][current_assay_plate_num - 1]
+        culture_stock_column = payload['culture_stock_column'][current_assay_plate_num - 1]
+        culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
+        media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
+        treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
+        tip_box_location = f"Position{payload['tip_box_position']}"
     except Exception as error_msg: 
         # TODO: how to handle this?
         raise error_msg
     
     # Locate treatment plate location and column
-    try:
-        treatment_plate_loc, treatment_column = find_treatment_loc(treatment)
-    except Exception as e:
-        print(f"Unable to locate treatment {treatment}")
-        raise  # need to know locaton of treatment, rest of protocol useless if not specified
+    # TODO: WHERE DOES THE TREATMENT PLATE GO?
+    treatment_plate_loc = "Position5"
+    # try:
+    #     treatment_plate_loc, treatment_column = find_treatment_loc(treatment)
+    # except Exception as e:
+    #     print(f"Unable to locate treatment {treatment}")
+    #     raise  # need to know locaton of treatment, rest of protocol useless if not specified
     
     # Other protocol variables
     blowoff_volume = 10
@@ -83,13 +86,13 @@ def generate_hso_file(
     # * Fill colums 1-5 of generic 96 well plate with 216uL lb media in two steps (will use for both halves of plate)
     soloSoft.getTip("Position1")  
     for i in range(
-        (6 * (treatment_dil_half - 1)) + 1, (6 * (treatment_dil_half - 1)) + 6
+        (6 * (treatment_dilution_half - 1)) + 1, (6 * (treatment_dilution_half - 1)) + 6
     ):  # columns 1-5 or columns 7-11 (treatment_dil_half = 1 or 2)
         # draws from both lb media wells to prevent running out of media
         soloSoft.aspirate(  # 120 from first lb media well
             position="Position7",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                media_start_column, media_transfer_volume_s2
+                media_stock_start_column, media_transfer_volume_s2
             ),
             aspirate_shift=[0, 0, media_z_shift],
             # pre_aspirate=blowoff_volume,
@@ -106,7 +109,7 @@ def generate_hso_file(
         soloSoft.aspirate(  # 120 from second lb media well
             position="Position7",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                media_start_column + 1, media_transfer_volume_s2
+                media_stock_start_column + 1, media_transfer_volume_s2
             ),
             aspirate_shift=[0, 0, media_z_shift],
             # pre_aspirate=blowoff_volume,
@@ -122,7 +125,7 @@ def generate_hso_file(
 
     # TODO: combine this with loop above
     # * Fill column 6 of a generic 96 well plate with 240uL lb media total in two steps
-    for i in range(media_start_column, media_start_column + 2):
+    for i in range(media_stock_start_column, media_stock_start_column + 2):
         soloSoft.aspirate(  # first lb media well
             position="Position7",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
@@ -134,7 +137,7 @@ def generate_hso_file(
         soloSoft.dispense(
             position="Position6",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                (6 * (treatment_dil_half - 1)) + 6, last_column_transfer_volume_s2
+                (6 * (treatment_dilution_half - 1)) + 6, last_column_transfer_volume_s2
             ),
             dispense_shift=[0, 0, reservoir_z_shift],
             # blowoff=blowoff_volume,
@@ -145,7 +148,7 @@ def generate_hso_file(
         soloSoft.aspirate(
             position=treatment_plate_loc,
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                treatment_column, serial_antibiotic_transfer_volume_s2
+                treatment_stock_column, serial_antibiotic_transfer_volume_s2
             ),
             pre_aspirate=blowoff_volume,
             mix_at_start=True,
@@ -157,7 +160,7 @@ def generate_hso_file(
         soloSoft.dispense(
             position="Position6",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                (6 * (treatment_dil_half - 1)) + 1, serial_antibiotic_transfer_volume_s2
+                (6 * (treatment_dilution_half - 1)) + 1, serial_antibiotic_transfer_volume_s2
             ),
             dispense_shift=[0, 0, reservoir_z_shift],
             blowoff=blowoff_volume,
@@ -169,7 +172,7 @@ def generate_hso_file(
 
     # * Serial dilution within Generic 96 well plate (Corning or Falcon) - mix 3 times before and after transfer
     for i in range(
-        (6 * (treatment_dil_half - 1)) + 1, (6 * (treatment_dil_half - 1)) + 5
+        (6 * (treatment_dilution_half - 1)) + 1, (6 * (treatment_dilution_half - 1)) + 5
     ):  # don't serial dilute into the last column (control column)
         # if i == 4:  # switch tips half way through to reduce error   #TODO: Test if you need this
         #     soloSoft.getTip()
@@ -206,28 +209,28 @@ def generate_hso_file(
 
 
 # HELPER METHOD ----------------------------------  # TODO: LOOK UP WHAT POSITION THE TREATMENT IS IN NOW!!!
-def find_treatment_loc(treatment_name): 
-    """
-    Connect to SQL database. Determine plate # and well location of desired treatment
-    (for now, these locations will be hardcoded (plate assumed to be on Solo deck))
+# def find_treatment_loc(treatment_name): 
+#     """
+#     Connect to SQL database. Determine plate # and well location of desired treatment
+#     (for now, these locations will be hardcoded (plate assumed to be on Solo deck))
 
-    """
-    treatment_locations = {
-        "col1": ["Position8", 1],
-        "col2": ["Position8", 2],
-        "col3": ["Position8", 3],
-        "col4": ["Position8", 4],
-        "col5": ["Position8", 5],
-        "col6": ["Position8", 6],
-        "col7": ["Position8", 7],
-        "col8": ["Position8", 8],
-        "col9": ["Position8", 9],
-        "col10": ["Position8", 10],
-        "col11": ["Position8", 11],
-        "col12": ["Position8", 12],
-    }
+#     """
+#     treatment_locations = {
+#         "col1": ["Position8", 1],
+#         "col2": ["Position8", 2],
+#         "col3": ["Position8", 3],
+#         "col4": ["Position8", 4],
+#         "col5": ["Position8", 5],
+#         "col6": ["Position8", 6],
+#         "col7": ["Position8", 7],
+#         "col8": ["Position8", 8],
+#         "col9": ["Position8", 9],
+#         "col10": ["Position8", 10],
+#         "col11": ["Position8", 11],
+#         "col12": ["Position8", 12],
+#     }
 
-    return treatment_locations[treatment_name]
+#     return treatment_locations[treatment_name]
 
 
 

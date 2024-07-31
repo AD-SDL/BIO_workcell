@@ -1,0 +1,156 @@
+name: Growth Curve - Workflow
+
+metadata:
+  author: Casey Stone, Abraham Stroka
+  info: create_plate_T0 Workflow for BIO350 multi growth_app application
+  version: 0.1
+
+flowdef:
+  - name: Move plate from Stack1 to Solo.Position2
+    module: platecrane
+    action: transfer
+    args:
+      source: "Stack1"
+      target: "Solo.Position2"
+      plate_type: "flat_bottom_96well" 
+    checks: null
+    comment: Place plate in Solo Position2
+
+  - name: Remove lid    
+    module: platecrane
+    action: remove_lid
+    args:
+      source: "Solo.Position2"
+      target: "LidNest1"
+      plate_type: "flat_bottom_96well"
+    comment: Place plate lid on lid nest 2
+  
+  - name: Move platecrane to Safe location
+    module: platecrane
+    action: move_safe
+    args:
+      foo: "bar"
+    checks: null
+    comment: Move platecrane out of the way of SOLO arm
+
+    # STEP 1
+  - name: Mix Reactions
+    module: solo
+    action: run_protocol
+    args:
+      hso_contents: payload.hso_1
+      hso_num_lines: payload.hso_1_lines
+      hso_basename: payload.hso_1_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+    # STEP 2
+  - name: Mix Reactions
+    module: solo
+    action: run_protocol
+    args:
+      hso_contents: payload.hso_2
+      hso_num_lines: payload.hso_2_lines
+      hso_basename: payload.hso_2_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+    # STEP 3
+  - name: Mix Reactions
+    module: solo
+    action: run_protocol
+    args:
+      hso_contents: payload.hso_3
+      hso_num_lines: payload.hso_3_lines
+      hso_basename: payload.hso_3_basename
+    checks: RESOURCE_CHECK
+    comment: resource check not implemented, but will be
+
+  - name: Open Hidex
+    module: hidex
+    action: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+- name: Move plate from Solo Position2 to Hidex Nest
+    module: platecrane
+    action: transfer
+    args:
+      source: "Solo.Position2"
+      target: "Hidex.Nest"      
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
+    checks: null
+    comment: Place plate to Hidex Nest
+
+  - name: run Hidex
+    module: hidex
+    action: run_assay
+    args: 
+      assay_name: "Campaign2_wei_cs"
+    checks: null
+    comment: Run protocol at hidex
+
+  - name: Open Hidex
+    module: hidex
+    action: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from Hidex.Nest to Sealer
+    module: platecrane
+    action: transfer
+    args:
+      source: "Hidex.Nest"
+      target: "Sealer.Nest"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
+    checks: null
+    comment: Place plate to Sealer
+
+  - name: Close Hidex
+    module: hidex
+    action: close
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Close Hidex Gate
+
+  - name: Seal plate
+    module: sealer
+    action: seal
+    args:
+      time: payload:seal.time
+      temperature: 175
+    checks: null
+    comment: Seal the plate
+
+  - name: Move plate from Sealer to Liconic
+    module: platecrane
+    action: transfer
+    args:
+      source: "Sealer.Nest"
+      target: "Liconic.Nest"
+      plate_type: "flat_bottom_96well"
+    checks: null
+    comment: Place plate onto Liconic
+
+  - name: Load Liconic
+    module: liconic
+    action: load_plate
+    args: 
+      plate_id: payload.current_assay_plate_num
+    checks: null
+    comment: Load assay plate into Liconic
+
+  - name: Start shaker at set speed
+    module: liconic
+    action: begin_shake
+    args: 
+      shaker_speed: payload.shaker_speed
+    checks: null
+    comment: Shake the assay plate in Liconic

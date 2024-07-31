@@ -1,0 +1,15 @@
+name: Refill Tips WF 
+
+metadata:
+  author: Casey Stone, Abraham Stroka 
+  info: Workflow to refill tips 
+  version: 0.1
+ 
+flowdef:
+  - name: Refill Tips
+    module: solo
+    action: refill_tips
+    args:
+      position: payload.tip_box_position
+    checks: null
+    comment: Reset Tip Box Number to 96 Tips

@@ -1,0 +1,88 @@
+name: Growth Curve - Workflow
+
+metadata:
+  author: Casey Stone, Abraham Stroka
+  info: read_plate_T12 Workflow for BIO350 multi growth_app application
+  version: 0.1
+
+flowdef:
+  - name: Unload Liconic
+    module: liconic
+    action: unload_plate
+    args: 
+      plate_id: payload.current_assay_plate_num
+    checks: null
+    comment: Stage pcr plates
+      
+  - name: Move plate from Liconic to Peeler
+    module: platecrane
+    action: transfer
+    args:
+      source: "Liconic.Nest"
+      target: "Peeler.Nest"
+      plate_type: "flat_bottom_96well"
+    checks: null
+    comment: Place plate onto PeelerNest
+  
+  - name: Peel
+    module: peeler
+    action: peel
+    args:
+      test: null
+    checks: null
+    comment: null
+    
+  - name: Open Hidex
+    module: hidex
+    action: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from Peeler.Nest to Hidex.Nest
+    module: platecrane
+    action: transfer
+    args:
+      source: "Peeler.Nest"
+      target: "Hidex.Nest"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
+    checks: nullpayload.stacker
+    comment: Place plate in Hidex Nest
+
+  - name: run Hidex
+    module: hidex
+    action: run_assay
+    args: 
+      assay_name: "Campaign2_wei_cs"
+    checks: null  
+    comment: Run protocol Hidex 
+
+  - name: Open Hidex
+    module: hidex
+    action: open
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from HidexNest to Stack1
+    module: platecrane
+    action: transfer
+    args:
+      source: "Hidex.Nest"
+      target: "Stack5"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
+    checks: null
+    comment: Place plate into trash Stack
+
+  - name: Close Hidex
+    module: hidex
+    action: close
+    args: 
+      foo: "bar"
+    checks: null
+    comment: Close Hidex Gate
+     

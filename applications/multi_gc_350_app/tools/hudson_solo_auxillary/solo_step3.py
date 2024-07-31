@@ -8,7 +8,6 @@ from liquidhandling import Reservoir_12col_Agilent_201256_100_BATSgroup, Plate_9
 
 def generate_hso_file(
         payload, 
-        current_assay_plate_num,
         temp_file_path,
 ): 
     """generate_hso_file
@@ -26,11 +25,13 @@ def generate_hso_file(
     
     # extract payload variables
     try: 
-        treatment = payload['treatment'][current_assay_plate_num]
-        culture_column = payload['culture_column'][current_assay_plate_num]
-        culture_dil_column = payload['culture_dil_column'][current_assay_plate_num]
-        media_start_column = payload['media_start_column'][current_assay_plate_num]
-        treatment_dil_half = payload['treatment_dil_half'][current_assay_plate_num]
+        current_assay_plate_num = payload['current_assay_plate_num']
+        treatment_stock_column = payload['treatment_stock_column'][current_assay_plate_num - 1]
+        culture_stock_column = payload['culture_stock_column'][current_assay_plate_num - 1]
+        culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
+        media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
+        treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
+        tip_box_location = f"Position{payload['tip_box_position']}"
     except Exception as error_msg: 
         # TODO: how to handle this?
         raise error_msg
@@ -72,7 +73,7 @@ def generate_hso_file(
         soloSoft.aspirate(
             position="Position6",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                (6 * (treatment_dil_half - 1)) + i, antibiotic_transfer_volume_s3
+                (6 * (treatment_dilution_half - 1)) + i, antibiotic_transfer_volume_s3
             ),
             mix_at_start=True,
             mix_cycles=num_mixes,
@@ -99,7 +100,7 @@ def generate_hso_file(
         soloSoft.aspirate(
             position="Position6",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                (6 * (treatment_dil_half - 1)) + i, antibiotic_transfer_volume_s3
+                (6 * (treatment_dilution_half - 1)) + i, antibiotic_transfer_volume_s3
             ),
             mix_at_start=True,
             mix_cycles=num_mixes,

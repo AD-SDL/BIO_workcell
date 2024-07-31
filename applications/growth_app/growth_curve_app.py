@@ -12,37 +12,24 @@ from tools.hudson_solo_auxillary import solo_step1, solo_step2, solo_step3
 
 import time
 
-# The main script for running a single-cell plate growth assay. 
+# The main script for running a single plate growth assay. 
 def main():
-    #Accessing the paths for the T0 Workflow and the T12 workflow. 
-    #The Paths will need to be changed if the corresponding Yaml file locations are changed
-
     # directory paths
     bio_workcell_path = Path(__file__).parent.parent.parent
     app_dir = bio_workcell_path / "applications" / "growth_app"
     wf_dir = app_dir / "workflows"
     
-
     # workflow paths
     T0_wf_path = wf_dir / "create_plate_T0.yaml"
     T12_wf_path = wf_dir / "read_plate_T12.yaml"
 
-    # wf_path_1 = Path(
-    #     "/home/rpl/workspace/BIO_workcell/applications/applications/growth_app/workflows/create_plate_T0.yaml"
-    # )
-    # wf_path_2 = Path(
-    #     "/home/rpl/workspace/BIO_workcell/applications/applications/growth_app/workflows/read_plate_T12.yaml"
-    # )
-
-    #Creates a WEI Experiment at the 8000 port and registers the experiment with the title Growth_Curve
- 
+    # create and register the WEI experiment
     exp = wei.ExperimentClient(
         server_host = "127.0.0.1",
         server_port = "8000",
         experiment_name = "Growth_App",
         description="Single plate growth curve assay."
     )
-    #exp.register_exp()
 
     #Generate the payload for the T0 and T12 readings. The T0 and T12 Yaml files (at the position paths above) and hso_packages for the Hudson Solo (created below) will use the following values in the workflow
     payload = {
@@ -59,8 +46,7 @@ def main():
         "tip_box_position": "3", # string of an integer 1-8 that identifies the position of the tip box when it is being refilled
     }
 
-    # Creating HSO Packages to send liquid handling protocols to the Hudson Solo.
-    # There are 3 separate hso files added because Hudson Solo caps the amount of steps per protocol.
+    # generate HSO protocol files to Hudson SOLO liquid handler
     exp.events.log_local_compute("package_hso")
     hso_1, hso_1_lines, hso_1_basename = package_hso(
         solo_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso"
@@ -72,7 +58,7 @@ def main():
         solo_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso"
     )
 
-    # Add the HSO Packages to the payload to send to the Hudson Solo
+    # add the HSO
     payload["hso_1"] = hso_1
     payload["hso_1_lines"] = hso_1_lines
     payload["hso_1_basename"] = hso_1_basename

@@ -3,35 +3,40 @@
 from pathlib import Path
 
 # from rpl_wei.wei_workcell_base import WEI
-from tools.gladier_flow.growth_curve_gladier_flow import c2_flow
+# from tools.gladier_flow.growth_curve_gladier_flow import c2_flow
 from pathlib import Path
 from tools.hudson_solo_auxillary.hso_functions import package_hso
 from tools.hudson_solo_auxillary import solo_step1, solo_step2, solo_step3
-from rpl_wei import Experiment
+from tools.helper_functions import parse_run_details_csv
+# from rpl_wei import Experiment
+import wei
 import time
 
 
 def main():
+    # directory paths
+    bio_workcell_path = Path(__file__).parent.parent.parent
+    app_dir = bio_workcell_path / "applications" / "multi_gc_350_app"
+    wf_dir = app_dir / "workflows"
+    
+    # workflow paths
+    wc_setup_wf_path = wf_dir / "workcell_setup.yaml"
+    refill_tips_wf_path = wf_dir / "refill_tips.yaml"
+    T0_wf_path = wf_dir / "create_plate_T0.yaml"
+    T12_wf_path = wf_dir / "read_plate_T12.yaml"
 
-    # Workflow paths (TODO: perhaps not hard coded :) )
-
-    wf_path_1 = Path(
-        "/home/rpl/workspace/BIO_workcell/applications/applications/growth_app/workflows/create_plate_T0.yaml"
-    )
-    wf_path_2 = Path(
-        "/home/rpl/workspace/BIO_workcell/applications/applications/growth_app/workflows/read_plate_T12.yaml"
-    )
+    # run details csv path # TODO: make this an argument you can pass in?
+    run_details_csv_path = app_dir / "tools" / "run_details.csv"
 
     #Creates a WEI Experiment at the 8000 port and registers the experiment 
-    exp = Experiment("127.0.0.1", "8000", "Multi_GC_350")
-    exp.register_exp()
+    exp = wei.ExperimentClient(
+        server_host = "localhost",
+        server_port = "8000",
+        experiment_name = "Multi_GC_350",
+        description="Growth Curve assay producing multiple assay plates on BIO350 workcell"
+    )
 
-    # TODO: Excel parsing with checks on input values
-        # - are the lists equal length
-        # - format lists for payload
-        # - separate variable for number of assay plates to create
-
-    num_assay_plates = 12
+    num_assay_plates = None
 
     # Initial payload setup
     payload = {
@@ -40,30 +45,41 @@ def main():
         "shaker_speed": 30, #an integer value setting the shaker speed of the Liconic Incubator
         # "stacker": 1, # an integer value specifying which stacker a well plate should be used in (Preferable to use "incubation_plate_id" : plate_id, where plate_id is an integer 1-88 - stacker and slot will be autocalculated)
         # "slot": 2, # an integer value specifying which slot a well plate should be used in (Preferable to use "incubation_plate_id" : plate_id, where plate_id is an integer 1-88 - stacker and slot will be autocalculated)
-        "treatment": ["col1" ,"col2", "col3", "col4", "col4","col5" ,"col6", "col7", "col8", "col9", "col10", "col11", "col12"],  # string of treatment name. Ex. "col1", "col2"
-        "culture_column": [1,2,3,4,5,6,7,8,9,10,11,12],  # what column of the culture stock plate to use for each assay plate
-        "culture_dil_column": [1,2,3,4,5,6,7,8,9,10,11,12],  # int of dilution column for 1:10 culture dilutions. Ex. 1, 2, 3, etc.
-        "media_start_column": [1,3,5,7,9,11,1,3,5,7,9,11],  # int of column to draw media from (requires 2 columns, 1 means columns 1 and 2) Ex. 1, 3, 5, etc.
-        "treatment_dil_half": [1,2,1,2,1,2,1,2,1,2,1,2],  #  int of which plate half to use for treatment serial dilutions. Options are 1 or 2.
-        "tip_box_position": "1", # string of an integer 1-8 that identifies the position of the tip box when it is being refilled
+        "tip_box_position": "3", # string of an integer 1-8 that identifies the position of the tip box when it is being refilled
     }
 
-    # Lopping to create assay plates
+    # parse the run details csv and add the information to the payload
+    run_details = parse_run_details_csv(run_details_csv_path)
+    num_assay_plates = run_details[0]
+    payload["treatment_stock_column"] = run_details[1]
+    payload["culture_stock_column"] = run_details[2]
+    payload["culture_dilution_column"] = run_details[3]
+    payload["media_stock_start_column"] = run_details[4]
+    payload["treatment_dilution_half"] = run_details[5]
 
+    # Run Workcell Setup Workflow (preheat the hidex to 37C)
+    exp.start_run(
+        workflow_file=wc_setup_wf_path, 
+        payload=payload, 
+        # blocking=True, 
+        simulate=False,
+    )
+
+    # Lopping to create assay plates
     for i in range(num_assay_plates): 
 
-        payload["current_assay_plate_num"] = i
-
-        # generate and package hso files (3 hso files per assay plate creation)   # TODO remove i from the function args now
-        exp.events.log_local_compute("package_hso")  # Q: Do we need this??
+        payload["current_assay_plate_num"] = i + 1
+        
+        # generate and package hso files (3 hso files per assay plate creation) 
+        exp.events.log_local_compute("package_hso")  
         hso_1, hso_1_lines, hso_1_basename = package_hso(
-            solo_step1.generate_hso_file, payload, i, "/home/rpl/wei_temp/solo_temp1.hso"
+            solo_step1.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp1.hso"
         )
         hso_2, hso_2_lines, hso_2_basename = package_hso(
-            solo_step2.generate_hso_file, payload, i, "/home/rpl/wei_temp/solo_temp2.hso"
+            solo_step2.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp2.hso"
         )
         hso_3, hso_3_lines, hso_3_basename = package_hso(
-            solo_step3.generate_hso_file, payload, i, "/home/rpl/wei_temp/solo_temp3.hso"
+            solo_step3.generate_hso_file, payload, "/home/rpl/wei_temp/solo_temp3.hso"
         )
 
         # Add the HSO Packages to the payload to send to the Hudson Solo
@@ -78,9 +94,28 @@ def main():
         payload["hso_3"] = hso_3
         payload["hso_3_lines"] = hso_3_lines
         payload["hso_3_basename"] = hso_3_basename
+        
+        # refill the tips (software step) before every two assay plates
+        if (i%2) == 0:  
+            exp.start_run(
+                workflow_file=refill_tips_wf_path, 
+                payload=payload, 
+                # blocking=True, 
+                simulate=False,
+            )
 
-        # TODO: Do we want to set up tip box on deck for first run??
-        # if run# % 2 == 0 then replace tip box and serial dilution plate (by hand or if we want to use gripper on the robot)
+        # Run the T0 workflow
+        exp.start_run(
+            workflow_file=T0_wf_path, 
+            payload=payload, 
+            # blocking=True, 
+            simulate=False,
+        )
+
+        
+
+
+
 
         # Run the T0 Workflow on the Registered WEI Experiment with the payload specified above
         flow_info = exp.run_job(wf_path_1.resolve(), payload=payload, simulate=False)    

@@ -14,7 +14,6 @@ from liquidhandling import Reservoir_12col_Agilent_201256_100_BATSgroup, Plate_9
 # SOLO PROTOCOL STEPS    
 def generate_hso_file(
         payload, 
-        current_assay_plate_num,
         temp_file_path,
 ): 
     """generate_hso_file
@@ -32,12 +31,16 @@ def generate_hso_file(
     """
     
         # extract payload variables
+    
     try: 
-        treatment = payload['treatment'][current_assay_plate_num]
-        culture_column = payload['culture_column'][current_assay_plate_num]
-        culture_dil_column = payload['culture_dil_column'][current_assay_plate_num]
-        media_start_column = payload['media_start_column'][current_assay_plate_num]
-        treatment_dil_half = payload['treatment_dil_half'][current_assay_plate_num]
+        current_assay_plate_num = payload['current_assay_plate_num']
+        treatment_stock_column = payload['treatment_stock_column'][current_assay_plate_num - 1]
+        culture_stock_column = payload['culture_stock_column'][current_assay_plate_num - 1]
+        culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
+        media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
+        treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
+        tip_box_location = f"Position{payload['tip_box_position']}"
+
     except Exception as error_msg: 
         # TODO: how to handle this?
         raise error_msg
@@ -80,13 +83,13 @@ def generate_hso_file(
     )
 
     # * Fill all columns of empty 96 well plate (corning 3383 or Falcon - ref 353916) with fresh lb media (12 channel in Position 1, media_start_column and media_start_column+1)
-    soloSoft.getTip("Position1")  
+    soloSoft.getTip(tip_box_location)  
     j = 1
     for i in range(1, 7):  # first half plate = media from column 1
         soloSoft.aspirate(
             position="Position7",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                media_start_column, media_transfer_volume_s1
+                media_stock_start_column, media_transfer_volume_s1
             ),
             aspirate_shift=[0, 0, media_z_shift],
         )
@@ -102,7 +105,7 @@ def generate_hso_file(
         soloSoft.aspirate(
             position="Position7",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                media_start_column + 1, media_transfer_volume_s1
+                media_stock_start_column + 1, media_transfer_volume_s1
             ),
             aspirate_shift=[0, 0, media_z_shift],
         )
@@ -119,14 +122,14 @@ def generate_hso_file(
         soloSoft.aspirate(
             position="Position7",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                media_start_column, half_dilution_media_volume
+                media_stock_start_column, half_dilution_media_volume
             ),
             aspirate_shift=[0, 0, media_z_shift],
         )
         soloSoft.dispense(
             position="Position4",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                culture_dil_column, half_dilution_media_volume
+                culture_dilution_column, half_dilution_media_volume
             ),
             dispense_shift=[0, 0, reservoir_z_shift],
         )
@@ -135,14 +138,14 @@ def generate_hso_file(
         soloSoft.aspirate(
             position="Position7",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                media_start_column + 1, half_dilution_media_volume
+                media_stock_start_column + 1, half_dilution_media_volume
             ),
             aspirate_shift=[0, 0, media_z_shift],
         )
         soloSoft.dispense(
             position="Position4",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                culture_dil_column, half_dilution_media_volume
+                culture_dilution_column, half_dilution_media_volume
             ),
             dispense_shift=[0, 0, reservoir_z_shift],
         )
@@ -152,7 +155,7 @@ def generate_hso_file(
         soloSoft.aspirate(
             position="Position3",
             aspirate_volumes=DeepBlock_96VWR_75870_792_sterile().setColumn(
-                culture_column, dilution_culture_volume
+                culture_stock_column, dilution_culture_volume
             ),
             aspirate_shift=[0, 0, 2],
             mix_at_start=True,
@@ -165,7 +168,7 @@ def generate_hso_file(
         soloSoft.dispense(
             position="Position4",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                culture_dil_column, dilution_culture_volume
+                culture_dilution_column, dilution_culture_volume
             ),
             dispense_shift=[0, 0, reservoir_z_shift],
             mix_at_finish=True,
@@ -180,7 +183,7 @@ def generate_hso_file(
     soloSoft.aspirate(
         position="Position4",
         aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-            culture_dil_column, dilution_culture_volume
+            culture_dilution_column, dilution_culture_volume
         ),
         aspirate_shift=[0, 0, reservoir_z_shift],
         # 100% syringe speed
@@ -188,7 +191,7 @@ def generate_hso_file(
     soloSoft.dispense(
         position="Position4",
         dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-            culture_dil_column, dilution_culture_volume
+            culture_dilution_column, dilution_culture_volume
         ),
         dispense_shift=[0, 0, reservoir_z_shift],
         mix_at_finish=True,
@@ -205,7 +208,7 @@ def generate_hso_file(
         soloSoft.aspirate(  # well in first half
             position="Position4",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                culture_dil_column, culture_transfer_volume_s1
+                culture_dilution_column, culture_transfer_volume_s1
             ),
             aspirate_shift=[
                 0,
@@ -234,7 +237,7 @@ def generate_hso_file(
         soloSoft.aspirate(  # well in second half
             position="Position4",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
-                culture_dil_column, culture_transfer_volume_s1
+                culture_dilution_column, culture_transfer_volume_s1
             ),
             aspirate_shift=[
                 0,
