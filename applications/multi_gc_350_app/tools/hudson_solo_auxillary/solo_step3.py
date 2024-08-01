@@ -55,23 +55,23 @@ def generate_hso_file(
     soloSoft = SoloSoft(
         filename=temp_file_path,
         plateList=[
-            "DeepBlock.96.VWR-75870-792.sterile",
-            "Empty",
             "TipBox.180uL.Axygen-EVF-180-R-S.bluebox",
             "Plate.96.Corning-3635.ClearUVAssay",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
+            "DeepBlock.96.VWR-75870-792.sterile",
+            "Empty",
         ],
     )
 
-    soloSoft.getTip("Position1")  
+    soloSoft.getTip(tip_box_location)  
     for i in range(6, 0, -1):  # first half of plate
         # if i == 3:  # switch tips half way through to reduce error  # tested and ok to remove
-        #     soloSoft.getTip()
+        #     soloSoft.getTip(tip_box_location)
         soloSoft.aspirate(
-            position="Position6",
+            position="Position3",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 (6 * (treatment_dilution_half - 1)) + i, antibiotic_transfer_volume_s3
             ),
@@ -93,10 +93,10 @@ def generate_hso_file(
             dispense_shift=[0, 0, flat_bottom_z_shift],
         )
 
-    soloSoft.getTip("Position1")
+    soloSoft.getTip(tip_box_location)
     for i in range(6, 0, -1):  # second half of plate
         # if i == 3:  # switch tips half way through to reduce error  # tested and ok to remove
-        #     soloSoft.getTip()
+        #     soloSoft.getTip(tip_box_location)
         soloSoft.aspirate(
             position="Position6",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(

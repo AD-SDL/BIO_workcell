@@ -36,15 +36,6 @@ def generate_hso_file(
         # TODO: how to handle this?
         raise error_msg
     
-    # Locate treatment plate location and column
-    # TODO: WHERE DOES THE TREATMENT PLATE GO?
-    treatment_plate_loc = "Position5"
-    # try:
-    #     treatment_plate_loc, treatment_column = find_treatment_loc(treatment)
-    # except Exception as e:
-    #     print(f"Unable to locate treatment {treatment}")
-    #     raise  # need to know locaton of treatment, rest of protocol useless if not specified
-    
     # Other protocol variables
     blowoff_volume = 10
     num_mixes = 3
@@ -72,19 +63,19 @@ def generate_hso_file(
     soloSoft = SoloSoft(
         filename=temp_file_path,
         plateList=[
-            "DeepBlock.96.VWR-75870-792.sterile",
-            "Empty",
             "TipBox.180uL.Axygen-EVF-180-R-S.bluebox",
             "Plate.96.Corning-3635.ClearUVAssay",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
+            "DeepBlock.96.VWR-75870-792.sterile",
+            "Empty",
         ],
     )
 
     # * Fill colums 1-5 of generic 96 well plate with 216uL lb media in two steps (will use for both halves of plate)
-    soloSoft.getTip("Position1")  
+    soloSoft.getTip(tip_box_location)  
     for i in range(
         (6 * (treatment_dilution_half - 1)) + 1, (6 * (treatment_dilution_half - 1)) + 6
     ):  # columns 1-5 or columns 7-11 (treatment_dil_half = 1 or 2)
@@ -98,7 +89,7 @@ def generate_hso_file(
             # pre_aspirate=blowoff_volume,
         )
         soloSoft.dispense(
-            position="Position6",
+            position="Position3",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 i, media_transfer_volume_s2
             ),
@@ -115,7 +106,7 @@ def generate_hso_file(
             # pre_aspirate=blowoff_volume,
         )
         soloSoft.dispense(
-            position="Position6",
+            position="Position3",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 i, media_transfer_volume_s2
             ),
@@ -135,7 +126,7 @@ def generate_hso_file(
             # pre_aspirate=blowoff_volume,
         )
         soloSoft.dispense(
-            position="Position6",
+            position="Position3",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 (6 * (treatment_dilution_half - 1)) + 6, last_column_transfer_volume_s2
             ),
@@ -143,10 +134,10 @@ def generate_hso_file(
             # blowoff=blowoff_volume,
         )
 
-    # * Transfer treatment in to first column of treatement dilution plate (will make 1:2 dilution)
+    # * Transfer treatment into first column of treatment dilution plate (will make 1:2 dilution)
     for i in range(2):
         soloSoft.aspirate(
-            position=treatment_plate_loc,
+            position="Position4",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 treatment_stock_column, serial_antibiotic_transfer_volume_s2
             ),
@@ -158,7 +149,7 @@ def generate_hso_file(
             dispense_height=reservoir_z_shift,
         )
         soloSoft.dispense(
-            position="Position6",
+            position="Position3",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 (6 * (treatment_dilution_half - 1)) + 1, serial_antibiotic_transfer_volume_s2
             ),
@@ -178,7 +169,7 @@ def generate_hso_file(
         #     soloSoft.getTip()
         for j in range(2): 
             soloSoft.aspirate(
-                position="Position6",
+                position="Position3",
                 aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                     i, serial_antibiotic_transfer_volume_s2
                 ),
@@ -190,7 +181,7 @@ def generate_hso_file(
                 dispense_height=reservoir_z_shift,
             )
             soloSoft.dispense(
-                position="Position6",
+                position="Position3",
                 dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                     i + 1, serial_antibiotic_transfer_volume_s2
                 ),
@@ -206,31 +197,6 @@ def generate_hso_file(
     soloSoft.shuckTip()
     soloSoft.savePipeline()
 
-
-
-# HELPER METHOD ----------------------------------  # TODO: LOOK UP WHAT POSITION THE TREATMENT IS IN NOW!!!
-# def find_treatment_loc(treatment_name): 
-#     """
-#     Connect to SQL database. Determine plate # and well location of desired treatment
-#     (for now, these locations will be hardcoded (plate assumed to be on Solo deck))
-
-#     """
-#     treatment_locations = {
-#         "col1": ["Position8", 1],
-#         "col2": ["Position8", 2],
-#         "col3": ["Position8", 3],
-#         "col4": ["Position8", 4],
-#         "col5": ["Position8", 5],
-#         "col6": ["Position8", 6],
-#         "col7": ["Position8", 7],
-#         "col8": ["Position8", 8],
-#         "col9": ["Position8", 9],
-#         "col10": ["Position8", 10],
-#         "col11": ["Position8", 11],
-#         "col12": ["Position8", 12],
-#     }
-
-#     return treatment_locations[treatment_name]
 
 
 

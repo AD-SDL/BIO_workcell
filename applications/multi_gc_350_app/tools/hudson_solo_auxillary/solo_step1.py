@@ -71,14 +71,14 @@ def generate_hso_file(
     soloSoft = SoloSoft(
         filename=temp_file_path,
         plateList=[
-            "DeepBlock.96.VWR-75870-792.sterile",
-            "Empty",
             "TipBox.180uL.Axygen-EVF-180-R-S.bluebox",
             "Plate.96.Corning-3635.ClearUVAssay",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
             "DeepBlock.96.VWR-75870-792.sterile",
+            "DeepBlock.96.VWR-75870-792.sterile",
+            "Empty",
         ],
     )
 
@@ -127,7 +127,7 @@ def generate_hso_file(
             aspirate_shift=[0, 0, media_z_shift],
         )
         soloSoft.dispense(
-            position="Position4",
+            position="Position5",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 culture_dilution_column, half_dilution_media_volume
             ),
@@ -143,7 +143,7 @@ def generate_hso_file(
             aspirate_shift=[0, 0, media_z_shift],
         )
         soloSoft.dispense(
-            position="Position4",
+            position="Position5",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 culture_dilution_column, half_dilution_media_volume
             ),
@@ -153,7 +153,7 @@ def generate_hso_file(
     # * Make culture 10 fold dilution
     for i in range(1, 3):  # all cells dispensed into same cell dilution column
         soloSoft.aspirate(
-            position="Position3",
+            position="Position6",
             aspirate_volumes=DeepBlock_96VWR_75870_792_sterile().setColumn(
                 culture_stock_column, dilution_culture_volume
             ),
@@ -166,7 +166,7 @@ def generate_hso_file(
             syringe_speed=25,
         )
         soloSoft.dispense(
-            position="Position4",
+            position="Position5",
             dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 culture_dilution_column, dilution_culture_volume
             ),
@@ -179,9 +179,9 @@ def generate_hso_file(
             # blowoff=blowoff_volume,
         )
 
-    # * Separate big mix step to ensure cell diluton column is well mixed  # added for 09/07/21
+    # * Separate big mix step to ensure cell dilution column is well mixed  # added for 09/07/21
     soloSoft.aspirate(
-        position="Position4",
+        position="Position5",
         aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
             culture_dilution_column, dilution_culture_volume
         ),
@@ -189,7 +189,7 @@ def generate_hso_file(
         # 100% syringe speed
     )
     soloSoft.dispense(
-        position="Position4",
+        position="Position5",
         dispense_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
             culture_dilution_column, dilution_culture_volume
         ),
@@ -202,11 +202,11 @@ def generate_hso_file(
         # blowoff=blowoff_volume,
     )
 
-    # * Add bacteria from 10 fold diluted culture plate (Position 7, column = culture_column[k]) to growth plate with fresh media (both halves)
-    soloSoft.getTip("Position1")  
+    # * Add bacteria from 10 fold diluted culture plate to growth plate with fresh media (both halves)
+    soloSoft.getTip(tip_box_location)  
     for i in range(1, 7):  # trying a different method of cell dispensing (09/07/21)
         soloSoft.aspirate(  # well in first half
-            position="Position4",
+            position="Position5",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 culture_dilution_column, culture_transfer_volume_s1
             ),
@@ -235,7 +235,7 @@ def generate_hso_file(
         )
 
         soloSoft.aspirate(  # well in second half
-            position="Position4",
+            position="Position5",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 culture_dilution_column, culture_transfer_volume_s1
             ),
