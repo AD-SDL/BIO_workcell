@@ -31,7 +31,7 @@ def generate_hso_file(
         culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
         media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
         treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
-        tip_box_location = f"Position{payload['tip_box_position']}"
+        tip_box_position = f"Position{payload['tip_box_position']}"
     except Exception as error_msg: 
         # TODO: how to handle this?
         raise error_msg
@@ -66,7 +66,7 @@ def generate_hso_file(
         ],
     )
 
-    soloSoft.getTip(tip_box_location)  
+    soloSoft.getTip(tip_box_position)  
     for i in range(6, 0, -1):  # first half of plate
         # if i == 3:  # switch tips half way through to reduce error  # tested and ok to remove
         #     soloSoft.getTip(tip_box_location)
@@ -93,10 +93,10 @@ def generate_hso_file(
             dispense_shift=[0, 0, flat_bottom_z_shift],
         )
 
-    soloSoft.getTip(tip_box_location)
+    soloSoft.getTip(tip_box_position)
     for i in range(6, 0, -1):  # second half of plate
         # if i == 3:  # switch tips half way through to reduce error  # tested and ok to remove
-        #     soloSoft.getTip(tip_box_location)
+        #     soloSoft.getTip(tip_box_position)
         soloSoft.aspirate(
             position="Position6",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(

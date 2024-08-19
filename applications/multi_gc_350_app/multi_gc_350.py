@@ -105,20 +105,43 @@ def main():
             )
 
         # Run the T0 workflow
-        exp.start_run(
+        run_info = exp.start_run(
             workflow_file=T0_wf_path, 
             payload=payload, 
             # blocking=True, 
             simulate=False,
         )
 
-        
+        # TODO: Collect the Hidex data from the run info and do something with it
+        hidex_file_name = run_info["hist"]["run Hidex"]["action_msg"]
+        output_dir = Path.home() / "runs" / run_info["experiment_id"]
+        output_dir.mkdir(parents=True, exist_ok=True)
+        exp.get_wf_result_file(run_id=run_info["run_id"], filename=hidex_file_name, output_filepath=output_dir / hidex_file_name)
 
+    time.sleep(43200)  # 12 hours = 43200 seconds  # TODO: subtract time it took to make the plates
 
+    for i in range(num_assay_plates): 
 
+        payload["current_assay_plate_num"] = i + 1
 
-        # Run the T0 Workflow on the Registered WEI Experiment with the payload specified above
-        flow_info = exp.run_job(wf_path_1.resolve(), payload=payload, simulate=False)    
+        # Run the T12 Workflow
+        run_info = exp.start_run(
+            workflow_file=T12_wf_path, 
+            payload=payload, 
+            # blocking=True, 
+            simulate=False,
+        )       
+
+        # TODO: collect the Hidex data from the run info and do something with it
+        hidex_file_name = run_info["hist"]["run Hidex"]["action_msg"]
+        output_dir = Path.home() / "runs" / run_info["experiment_id"]
+        output_dir.mkdir(parents=True, exist_ok=True)
+        exp.get_wf_result_file(run_id=run_info["run_id"], filename=hidex_file_name, output_filepath=output_dir / hidex_file_name)
+
+        time.sleep(500)  # TODO: Determine difference in T0 and T12
+
+       
+   
 
         # Pinging the status of the T0 Workflow sent to the WEI Experiment every 3 seconds  # TODO: Do we need this???
         flow_status = exp.query_job(flow_info["job_id"])

@@ -39,7 +39,7 @@ def generate_hso_file(
         culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
         media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
         treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
-        tip_box_location = f"Position{payload['tip_box_position']}"
+        tip_box_position = f"Position{payload['tip_box_position']}"
 
     except Exception as error_msg: 
         # TODO: how to handle this?
@@ -83,7 +83,7 @@ def generate_hso_file(
     )
 
     # * Fill all columns of empty 96 well plate (corning 3383 or Falcon - ref 353916) with fresh lb media (12 channel in Position 1, media_start_column and media_start_column+1)
-    soloSoft.getTip(tip_box_location)  
+    soloSoft.getTip(tip_box_position)  
     j = 1
     for i in range(1, 7):  # first half plate = media from column 1
         soloSoft.aspirate(
@@ -203,7 +203,7 @@ def generate_hso_file(
     )
 
     # * Add bacteria from 10 fold diluted culture plate to growth plate with fresh media (both halves)
-    soloSoft.getTip(tip_box_location)  
+    soloSoft.getTip(tip_box_position)  
     for i in range(1, 7):  # trying a different method of cell dispensing (09/07/21)
         soloSoft.aspirate(  # well in first half
             position="Position5",

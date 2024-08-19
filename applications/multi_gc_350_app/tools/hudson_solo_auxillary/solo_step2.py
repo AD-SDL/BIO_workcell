@@ -31,7 +31,7 @@ def generate_hso_file(
         culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
         media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
         treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
-        tip_box_location = f"Position{payload['tip_box_position']}"
+        tip_box_position = f"Position{payload['tip_box_position']}"
     except Exception as error_msg: 
         # TODO: how to handle this?
         raise error_msg
@@ -75,7 +75,7 @@ def generate_hso_file(
     )
 
     # * Fill colums 1-5 of generic 96 well plate with 216uL lb media in two steps (will use for both halves of plate)
-    soloSoft.getTip(tip_box_location)  
+    soloSoft.getTip(tip_box_position)  
     for i in range(
         (6 * (treatment_dilution_half - 1)) + 1, (6 * (treatment_dilution_half - 1)) + 6
     ):  # columns 1-5 or columns 7-11 (treatment_dil_half = 1 or 2)
