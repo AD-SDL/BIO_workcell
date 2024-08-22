@@ -1,17 +1,17 @@
 name: Demo - Workflow
 
 metadata:
-  author: Casey Stone, Abraham Stroka 
+  author: Casey Stone, Abraham Stroka
   info: Demonstration Workflow for BIO350 Workcell
   version: 0.1
- 
+
 flowdef:
   - name: run Hidex
     module: hidex
     action: run_assay
-    args: 
+    args:
       assay_name: "SetTemp37"
+      wait_until_complete: false
     checks: null
     comment: Preheat the Hidex to 37C
 
-  

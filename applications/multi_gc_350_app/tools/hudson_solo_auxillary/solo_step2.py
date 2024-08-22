@@ -1,41 +1,46 @@
-import os
-import sys
-import time
-import argparse
-from liquidhandling import SoloSoft
-from liquidhandling import Reservoir_12col_Agilent_201256_100_BATSgroup, Plate_96_Corning_3635_ClearUVAssay, DeepBlock_96VWR_75870_792_sterile
+from liquidhandling import Reservoir_12col_Agilent_201256_100_BATSgroup, SoloSoft
 
- 
+
 def generate_hso_file(
-        payload, 
-        temp_file_path,
-): 
+    payload,
+    temp_file_path,
+):
     """generate_hso_file
 
-    Description: 
+    Description:
         Generates SOLOSoft .hso file for step 2 of the growth curve workflow
 
         Step 2 of the growth curve protocol includes:
-            - Serial dilution of treatment 
+            - Serial dilution of treatment
 
     Args:
         payload (dict): input variables from the wei workflow
-        temp_file_path (str): file path to temporarily save hso file to 
+        temp_file_path (str): file path to temporarily save hso file to
     """
-    
+
     # extract payload variables
-    try: 
-        current_assay_plate_num = payload['current_assay_plate_num']
-        treatment_stock_column = payload['treatment_stock_column'][current_assay_plate_num - 1]
-        culture_stock_column = payload['culture_stock_column'][current_assay_plate_num - 1]
-        culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
-        media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
-        treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
+    try:
+        current_assay_plate_num = payload["current_assay_plate_num"]
+        treatment_stock_column = payload["treatment_stock_column"][
+            current_assay_plate_num - 1
+        ]
+        culture_stock_column = payload["culture_stock_column"][
+            current_assay_plate_num - 1
+        ]
+        culture_dilution_column = payload["culture_dilution_column"][
+            current_assay_plate_num - 1
+        ]
+        media_stock_start_column = payload["media_stock_start_column"][
+            current_assay_plate_num - 1
+        ]
+        treatment_dilution_half = payload["treatment_dilution_half"][
+            current_assay_plate_num - 1
+        ]
         tip_box_position = f"Position{payload['tip_box_position']}"
-    except Exception as error_msg: 
+    except Exception as error_msg:
         # TODO: how to handle this?
         raise error_msg
-    
+
     # Other protocol variables
     blowoff_volume = 10
     num_mixes = 3
@@ -50,12 +55,13 @@ def generate_hso_file(
     last_column_transfer_volume_s2 = (
         120  # two times = 240uL (to equal volume in 1:10 dilution wells)
     )
-    serial_antibiotic_transfer_volume_s2 = 120  # transfers twice (240tr + 240 lb = 1:2 dil)
+    serial_antibiotic_transfer_volume_s2 = (
+        120  # transfers twice (240tr + 240 lb = 1:2 dil)
+    )
     serial_source_mixing_volume_s2 = 110
     serial_source_num_mixes_s2 = 5
     serial_destination_mixing_volume_s2 = 150
 
-    
     """
     STEP 2: PERFORM SERIAL DILUTIONS ON TREATMENT -------------------------------------------------------------------------------
     """
@@ -74,8 +80,8 @@ def generate_hso_file(
         ],
     )
 
-    # * Fill colums 1-5 of generic 96 well plate with 216uL lb media in two steps (will use for both halves of plate)
-    soloSoft.getTip(tip_box_position)  
+    # # * Fill colums 1-5 of generic 96 well plate with 216uL lb media in two steps (will use for both halves of plate)
+    soloSoft.getTip(tip_box_position)
     for i in range(
         (6 * (treatment_dilution_half - 1)) + 1, (6 * (treatment_dilution_half - 1)) + 6
     ):  # columns 1-5 or columns 7-11 (treatment_dil_half = 1 or 2)
@@ -167,7 +173,7 @@ def generate_hso_file(
     ):  # don't serial dilute into the last column (control column)
         # if i == 4:  # switch tips half way through to reduce error   #TODO: Test if you need this
         #     soloSoft.getTip()
-        for j in range(2): 
+        for j in range(2):
             soloSoft.aspirate(
                 position="Position3",
                 aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(

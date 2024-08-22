@@ -9,11 +9,13 @@ flowdef:
   - name: Unload Liconic
     module: liconic
     action: unload_plate
-    args: 
-      plate_id: payload.current_assay_plate_num
+    args:
+      plate_id: payload.plate_id
+      stacker: null
+      slot: null
     checks: null
     comment: Stage pcr plates
-      
+
   - name: Move plate from Liconic to Peeler
     module: platecrane
     action: transfer
@@ -23,7 +25,7 @@ flowdef:
       plate_type: "flat_bottom_96well"
     checks: null
     comment: Place plate onto PeelerNest
-  
+
   - name: Peel
     module: peeler
     action: peel
@@ -31,11 +33,11 @@ flowdef:
       test: null
     checks: null
     comment: null
-    
+
   - name: Open Hidex
     module: hidex
     action: open
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Open Hidex Gate
@@ -54,20 +56,20 @@ flowdef:
   - name: run Hidex
     module: hidex
     action: run_assay
-    args: 
+    args:
       assay_name: "Campaign2_wei_cs"
-    checks: null  
-    comment: Run protocol Hidex 
+    checks: null
+    comment: Run protocol Hidex
 
   - name: Open Hidex
     module: hidex
     action: open
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from HidexNest to Stack1
+  - name: Move plate from HidexNest to Stack5
     module: platecrane
     action: transfer
     args:
@@ -81,8 +83,7 @@ flowdef:
   - name: Close Hidex
     module: hidex
     action: close
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Close Hidex Gate
-     

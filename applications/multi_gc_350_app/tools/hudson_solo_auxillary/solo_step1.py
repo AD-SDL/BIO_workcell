@@ -3,22 +3,23 @@ Generates steps 1, 2, and 3 SOLO hso files given command line inputs
 
 Returns paths to newly generated .hso files
 """
-import os
-import sys
-import time
-import argparse
-from liquidhandling import SoloSoft
-from liquidhandling import Reservoir_12col_Agilent_201256_100_BATSgroup, Plate_96_Corning_3635_ClearUVAssay, DeepBlock_96VWR_75870_792_sterile
+
+from liquidhandling import (
+    DeepBlock_96VWR_75870_792_sterile,
+    Plate_96_Corning_3635_ClearUVAssay,
+    Reservoir_12col_Agilent_201256_100_BATSgroup,
+    SoloSoft,
+)
 
 
-# SOLO PROTOCOL STEPS    
+# SOLO PROTOCOL STEPS
 def generate_hso_file(
-        payload, 
-        temp_file_path,
-): 
+    payload,
+    temp_file_path,
+):
     """generate_hso_file
 
-    Description: 
+    Description:
         Generates SOLOSoft .hso file for step 1 of the growth curve workflow
 
         Step 1 of the growth curve protocol includes:
@@ -27,12 +28,12 @@ def generate_hso_file(
 
     Args:
         payload (dict): input variables from the wei workflow
-        temp_file_path (str): file path to temporarily save hso file to 
+        temp_file_path (str): file path to temporarily save hso file to
     """
-    
-        # extract payload variables
-    
-    try: 
+
+    # extract payload variables
+
+    try:
         current_assay_plate_num = payload['current_assay_plate_num']
         treatment_stock_column = payload['treatment_stock_column'][current_assay_plate_num - 1]
         culture_stock_column = payload['culture_stock_column'][current_assay_plate_num - 1]
@@ -41,7 +42,7 @@ def generate_hso_file(
         treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
         tip_box_position = f"Position{payload['tip_box_position']}"
 
-    except Exception as error_msg: 
+    except Exception as error_msg:
         # TODO: how to handle this?
         raise error_msg
 
@@ -83,7 +84,7 @@ def generate_hso_file(
     )
 
     # * Fill all columns of empty 96 well plate (corning 3383 or Falcon - ref 353916) with fresh lb media (12 channel in Position 1, media_start_column and media_start_column+1)
-    soloSoft.getTip(tip_box_position)  
+    soloSoft.getTip(tip_box_position)
     j = 1
     for i in range(1, 7):  # first half plate = media from column 1
         soloSoft.aspirate(
@@ -203,7 +204,7 @@ def generate_hso_file(
     )
 
     # * Add bacteria from 10 fold diluted culture plate to growth plate with fresh media (both halves)
-    soloSoft.getTip(tip_box_position)  
+    soloSoft.getTip(tip_box_position)
     for i in range(1, 7):  # trying a different method of cell dispensing (09/07/21)
         soloSoft.aspirate(  # well in first half
             position="Position5",

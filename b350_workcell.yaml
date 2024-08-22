@@ -54,6 +54,4 @@ modules:
 locations:
   plateCrane:
     stack1: "Stack1"
-
-
-
+    
