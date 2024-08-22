@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import time
 from pathlib import Path
 
 import wei
@@ -62,7 +63,7 @@ def main():
         simulate=False,
     )
 
-    # Lopping to create assay plates
+    # Loop to create assay plates
     for i in range(num_assay_plates):
         payload["current_assay_plate_num"] = i + 1
         payload["plate_id"] = str(i + 1)
@@ -91,10 +92,8 @@ def main():
         payload["hso_2_path"] = hso_2_path
         payload["hso_3_path"] = hso_3_path
 
-        print(payload["hso_1_path"])
 
-
-        # refill the tips (software step) before every two assay plates
+        # # refill the tips (software step) before every two assay plates
         if (i % 2) == 0:
             exp.start_run(
                 workflow_file=refill_tips_wf_path,
@@ -103,7 +102,7 @@ def main():
                 simulate=False,
             )
 
-        # Run the T0 workflow
+        # # Run the T0 workflow
         run_info = exp.start_run(
             workflow_file=T0_wf_path,
             payload=payload,
@@ -146,96 +145,33 @@ def main():
         #     exp=exp,
         # )
 
-    # time.sleep(43200)  # 12 hours = 43200 seconds  # TODO: subtract time it took to make the plates
+    #time.sleep(43200 - (2160 * (num_assay_plates -1)))  # 12 hours = 43200 seconds, T0 half takes ~36 min to run (2160 seconds)
+    print(f"Now sleeping for {43200 - (2160 * (num_assay_plates -1))} seconds")
 
-    # for i in range(num_assay_plates):
+    # Loop to read assay plates
+    for i in range(num_assay_plates):
 
-    #     payload["current_assay_plate_num"] = i + 1
+        payload["current_assay_plate_num"] = i + 1
 
-    #     # Run the T12 Workflow
-    #     run_info = exp.start_run(
-    #         workflow_file=T12_wf_path,
-    #         payload=payload,
-    #         # blocking=True,
-    #         simulate=False,
-    #     )
+        # Run the T12 workflow
+        run_info = exp.start_run(
+            workflow_file=T12_wf_path,
+            payload=payload,
+            blocking=True,
+            simulate=False,
+        )
 
-    #     # TODO: collect the Hidex data from the run info and do something with it
-    #     hidex_file_name = run_info["hist"]["run Hidex"]["action_msg"]
-    #     output_dir = Path.home() / "runs" / run_info["experiment_id"]
-    #     output_dir.mkdir(parents=True, exist_ok=True)
-    #     exp.get_wf_result_file(run_id=run_info["run_id"], filename=hidex_file_name, output_filepath=output_dir / hidex_file_name)
+        # Collect and save the Hidex data from the T0 reading
+        output_dir = Path.home() / "runs" / run_info.experiment_id
+        output_dir.mkdir(parents=True, exist_ok=True)
+        datapoint_id = run_info.get_datapoint_id_by_label("T12_result")
+        exp.save_datapoint_value(datapoint_id, output_dir / f"T12_result_{payload['plate_id']}.xlsx")
 
-    #     time.sleep(500)  # TODO: Determine difference in T0 and T12
+        # Wait to run the next assay plate (Assay plate took ~36 min to create and T0 read but T12 reading only takes ~9min )
+        if i != num_assay_plates - 1:
+            time.sleep(1620)
 
-    #     # Pinging the status of the T0 Workflow sent to the WEI Experiment every 3 seconds  # TODO: Do we need this???
-    #     flow_status = exp.query_job(flow_info["job_id"])
-    #     while flow_status["status"] != "finished" and flow_status["status"] != "failure":
-    #         flow_status = exp.query_job(flow_info["job_id"])
-    #         time.sleep(3)
-
-    #     # TODO: AT THIS POINT: plate is just placed in incubator (timestamp)
-
-    #     # Receiving the Results of the now completed T0 Workflow, Creating a Path of the Run Directory, and printing the Run Information
-    #     run_info = flow_status["result"]
-    #     run_info["run_dir"] = Path(run_info["run_dir"])
-    #     print(run_info)
-
-    #     # Accessing the T0 Reading results file path from the Hidex
-    #     hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
-
-    #     # Formatting the File Path from Windows to be compatible with Linux file directory settings and creating a Path
-    #     hidex_file_path = hidex_file_path.replace('\\', '/')
-    #     hidex_file_path = hidex_file_path.replace("C:/", "/C/")
-    #     flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-
-    #     # Accessing the File Name
-    #     fname = flow_title.name
-
-    #     # Accessing the File Path
-    #     flow_title = flow_title.parents[0]
-
-    #     # TODO: Get globus things working again
-    #     # #Uploading the Hidex Data to the Globus client and portal. The arguments in the function are the strings of the experiment name (exp_name), plate number (plate_n), time uploaded (time), the flow_title (local_path), and file name (fname), and the WEI Experiment Object).
-    #     # c2_flow(exp_name = "T0_Reading", plate_n = "1", time = str(time.strftime("%H_%M_%S", time.localtime())), local_path=flow_title, fname = fname, exp = exp)
-
-    #     # END PLATE CREATION LOOP
-
-    # # Incubate for 12 hours
-    # print("Incubating plate for 12 hours")
-    # time.sleep(43200)    # TODO: Change this so we don't have to manually
-
-    # # BEGIN READ PLATE T12 LOOP
-    # for i in range(num_assay_plates):
-    #     # Run the T12 Workflow on the Registered WEI Experiment with the payload specified above to read the plate after the 12 hour wait
-    #     flow_info = exp.run_job(wf_path_2.resolve(), payload=payload, simulate=False)
-
-    #     # Pinging the status of the T0 Workflow sent to the WEI Experiment
-    #     flow_status = exp.query_job(flow_info["job_id"])
-    #     #Periodically checking the status every 3 seconds of the T0 Workflow until it is finished
-    #     while(flow_status["status"] != "finished" and flow_status["status"] != "failure"):
-    #         flow_status = exp.query_job(flow_info["job_id"])
-    #         time.sleep(3)
-
-    #     # Receiving the Results of the now completed T0 Workflow, Creating a Path of the Run Directory, and printing the Run Information
-    #     run_info = flow_status["result"]
-    #     run_info["run_dir"] = Path(run_info["run_dir"])
-    #     print(run_info)
-
-    #     # Accessing the T12 Reading results file path from the Hidex
-    #     hidex_file_path = run_info["hist"]["run Hidex"]["action_msg"]
-    #     # Formatting the File Path from Windows to be compatible with Linux file directory settings and creating a Path
-    #     hidex_file_path = hidex_file_path.replace('\\', '/')
-    #     hidex_file_path = hidex_file_path.replace("C:/", "/C/")
-    #     flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-    #     # Accessing the File Name
-    #     fname = flow_title.name
-    #     # Accessing the File Path
-    #     flow_title = flow_title.parents[0]
-
-    #     #Uploading the Hidex Data to the Globus client and portal. The arguments in the function are the strings of the experiment name (exp_name), plate number (plate_n), time uploaded (time), the flow_title (local_path), and file name (fname), and the WEI Experiment Object).
-    #     #Experiment name is T12_Reading to easily distinguish from the initial T0 Results in a Globus Portal Search
-    #     c2_flow(exp_name = "T12_Reading", plate_n = "1", time = str(time.strftime("%H_%M_%S", time.localtime())), local_path=flow_title, fname = fname, exp = exp)
+        # TODO: Globus things again
 
 
 if __name__ == "__main__":

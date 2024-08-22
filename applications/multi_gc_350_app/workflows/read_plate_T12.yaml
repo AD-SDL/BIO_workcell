@@ -1,4 +1,4 @@
-name: Growth Curve - Workflow
+name: Growth Curve (T12) - Workflow
 
 metadata:
   author: Casey Stone, Abraham Stroka
@@ -34,6 +34,16 @@ flowdef:
     checks: null
     comment: null
 
+  - name: Move plate from Peeler.Nest to Solo Position 2
+    module: platecrane
+    action: transfer
+    args:
+      source: "Peeler.Nest"
+      target: "Solo.Position2"
+      plate_type: "flat_bottom_96well"
+    checks: Transfer assay plate from Peeler to Hidex
+    comment: Place plate in Hidex Nest
+
   - name: Open Hidex
     module: hidex
     action: open
@@ -42,24 +52,26 @@ flowdef:
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from Peeler.Nest to Hidex.Nest
+  - name: Move plate from Solo Position2 to Hidex Nest
     module: platecrane
     action: transfer
     args:
-      source: "Peeler.Nest"
+      source: "Solo.Position2"
       target: "Hidex.Nest"
       plate_type: "flat_bottom_96well"
       height_offset: 8
-    checks: nullpayload.stacker
-    comment: Place plate in Hidex Nest
+    checks: null
+    comment: Place plate to Hidex Nest
 
   - name: run Hidex
     module: hidex
     action: run_assay
     args:
       assay_name: "Campaign2_wei_cs"
+    data_labels:
+      assay_result: T12_result
     checks: null
-    comment: Run protocol Hidex
+    comment: Run protocol at hidex
 
   - name: Open Hidex
     module: hidex

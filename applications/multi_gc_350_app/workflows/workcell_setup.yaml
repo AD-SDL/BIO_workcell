@@ -1,4 +1,4 @@
-name: Demo - Workflow
+name: Growth Curve (Workcell Setup) - Workflow
 
 metadata:
   author: Casey Stone, Abraham Stroka
@@ -11,7 +11,7 @@ flowdef:
     action: run_assay
     args:
       assay_name: "SetTemp37"
-      wait_until_complete: false
+      wait_for_result: false
     checks: null
     comment: Preheat the Hidex to 37C
 
