@@ -12,12 +12,12 @@ from tools.hudson_solo_auxillary.hso_functions import package_hso
 
 
 def main():
-    # directory paths
+    # Directory paths
     bio_workcell_path = Path(__file__).parent.parent.parent
     app_dir = bio_workcell_path / "applications" / "multi_gc_350_app"
     wf_dir = app_dir / "workflows"
 
-    # workflow paths
+    # Workflow paths
     wc_setup_wf_path = wf_dir / "workcell_setup.yaml"
     refill_tips_wf_path = wf_dir / "refill_tips.yaml"
     T0_wf_path = wf_dir / "create_plate_T0.yaml"
@@ -45,9 +45,8 @@ def main():
         "tip_box_position": "1",  # string of an integer 1-8 that identifies the position of the tip box when it is being refilled
     }
 
-    # parse the run details csv and add the information to the payload
+    # Parse the run details csv and add the information to the payload
     run_details = parse_run_details_csv(run_details_csv_path)
-
     num_assay_plates = run_details[0]
     incubation_hours = run_details[1]
     payload["treatment_stock_column"] = run_details[2]
@@ -92,13 +91,13 @@ def main():
             "/home/rpl/wei_temp/solo_temp3.hso"
         )
 
-        # # Save the temp hso file paths into the payload
+        # Save the temp hso file paths into the payload
         payload["hso_1_path"] = hso_1_path
         payload["hso_2_path"] = hso_2_path
         payload["hso_3_path"] = hso_3_path
 
 
-        # # refill the tips (software step) before every two assay plates
+        # Refill the tips (software step) before every two assay plates
         if (i % 2) == 0:
             exp.start_run(
                 workflow_file=refill_tips_wf_path,
@@ -107,7 +106,7 @@ def main():
                 simulate=False,
             )
 
-        # # # Run the T0 workflow
+        # Run the T0 workflow
         run_info = exp.start_run(
             workflow_file=T0_wf_path,
             payload=payload,
@@ -150,6 +149,7 @@ def main():
         #     exp=exp,
         # )
 
+    # Calculate total incubation time and sleep to allow for incubation
     incubation_seconds = incubation_hours * 3600
     time.sleep(incubation_seconds - (2160 * (num_assay_plates -1)))  # 12 hours = 43200 seconds, T0 half takes ~36 min to run (2160 seconds)
     start_time = datetime.now()
@@ -162,12 +162,11 @@ def main():
     print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
     print(f"Now sleeping for {incubation_seconds - (2160 * (num_assay_plates -1))} seconds")
 
-
     # Loop to read assay plates
     for i in range(num_assay_plates):
 
         payload["current_assay_plate_num"] = i + 1
-        payload["plate_id"] = str(i + 1)    # growth test will fail because of this !!!!!!
+        payload["plate_id"] = str(i + 1)
 
         # Testing
         print(f"Current assay plate number: {payload['current_assay_plate_num']}")
@@ -195,8 +194,6 @@ def main():
             print(f"starting sleep at {start_time.strftime('%I:%M:%S %p')}")
             print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
             print("Now sleeping for 1620 seconds")
-            pass
-
 
         # TODO: Globus things again
 
