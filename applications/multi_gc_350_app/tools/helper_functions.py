@@ -13,6 +13,7 @@ def parse_run_details_csv(run_details_csv_path: str):
 
     """
     num_assay_plates = None
+    incubation_hours= None
     treatment_stock_column = []
     culture_stock_column = []
     culture_dilution_column = []
@@ -33,6 +34,10 @@ def parse_run_details_csv(run_details_csv_path: str):
                     if line[0] == "Total Runs":
                         num_assay_plates = int(line[1])
 
+                    if line[0] == "Incubation Hours":
+                        incubation_hours = int(line[1])
+
+
                     if num_assay_plates:
                         if line[0] == "Treatment Stock Column":
                             treatment_stock_column = [int(x) for x in line[1:num_assay_plates+1]]
@@ -49,6 +54,7 @@ def parse_run_details_csv(run_details_csv_path: str):
         raise e
 
     print(num_assay_plates)
+    print(incubation_hours)
     print(treatment_stock_column)
     print(culture_stock_column)
     print(culture_dilution_column)
@@ -57,6 +63,7 @@ def parse_run_details_csv(run_details_csv_path: str):
 
     return (
         num_assay_plates,
+        incubation_hours,
         treatment_stock_column,
         culture_stock_column,
         culture_dilution_column,

@@ -1,6 +1,8 @@
-from liquidhandling import (Plate_96_Corning_3635_ClearUVAssay,
-                            Reservoir_12col_Agilent_201256_100_BATSgroup,
-                            SoloSoft)
+from liquidhandling import (
+    Plate_96_Corning_3635_ClearUVAssay,
+    Reservoir_12col_Agilent_201256_100_BATSgroup,
+    SoloSoft,
+)
 
 
 def generate_hso_file(
@@ -105,7 +107,7 @@ def generate_hso_file(
         # if i == 3:  # switch tips half way through to reduce error  # tested and ok to remove
         #     soloSoft.getTip(tip_box_position)
         soloSoft.aspirate(
-            position="Position6",
+            position="Position3",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 (6 * (treatment_dilution_half - 1)) + i, antibiotic_transfer_volume_s3
             ),

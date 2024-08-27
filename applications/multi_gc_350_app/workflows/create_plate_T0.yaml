@@ -145,10 +145,11 @@ flowdef:
     checks: null
     comment: Load assay plate into Liconic
 
-  - name: Start shaker at set speed
-    module: liconic
-    action: begin_shake
-    args:
-      shaker_speed: payload.shaker_speed
-    checks: null
-    comment: Shake the assay plate in Liconic
+  # DO NOT SHAKE UNTIL THE SHAKER IS INSTALLED
+  # - name: Start shaker at set speed
+  #   module: liconic
+  #   action: begin_shake
+  #   args:
+  #     shaker_speed: payload.shaker_speed
+  #   checks: null
+  #   comment: Shake the assay plate in Liconic
