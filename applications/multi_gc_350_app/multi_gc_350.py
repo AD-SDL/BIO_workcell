@@ -5,6 +5,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 
 import wei
+
 #from tools.gladier_flow.growth_curve_gladier_flow import c2_flow
 from tools.helper_functions import parse_run_details_csv
 from tools.hudson_solo_auxillary import solo_step1, solo_step2, solo_step3
@@ -47,14 +48,14 @@ def main():
 
     # Parse the run details csv and add the information to the payload
     run_details = parse_run_details_csv(run_details_csv_path)
+
     num_assay_plates = run_details[0]
     incubation_hours = run_details[1]
     payload["treatment_stock_column"] = run_details[2]
-    payload["culture_stock_column"] = run_details[2]
+    payload["culture_stock_column"] = run_details[3]
     payload["culture_dilution_column"] = run_details[4]
     payload["media_stock_start_column"] = run_details[5]
     payload["treatment_dilution_half"] = run_details[6]
-
 
     # Run Workcell Setup Workflow (preheat the hidex to 37C)
     exp.start_run(
@@ -151,7 +152,6 @@ def main():
 
     # Calculate total incubation time and sleep to allow for incubation
     incubation_seconds = incubation_hours * 3600
-    time.sleep(incubation_seconds - (2160 * (num_assay_plates -1)))  # 12 hours = 43200 seconds, T0 half takes ~36 min to run (2160 seconds)
     start_time = datetime.now()
     end_time = start_time + timedelta(seconds=incubation_seconds - (2160 * (num_assay_plates -1)))
 
@@ -160,7 +160,10 @@ def main():
     print(f"incubation_seconds: {incubation_seconds}")
     print(f"starting sleep at {start_time.strftime('%I:%M:%S %p')}")
     print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
-    print(f"Now sleeping for {incubation_seconds - (2160 * (num_assay_plates -1))} seconds")
+    print(f"Now sleeping for {incubation_seconds - (2159 * (num_assay_plates -1))} seconds")
+
+    # Sleep for the total incubation time
+    time.sleep(incubation_seconds - (2160 * (num_assay_plates -1)))  # 12 hours = 43200 seconds, T0 half takes ~36 min to run (2160 seconds)
 
     # Loop to read assay plates
     for i in range(num_assay_plates):
@@ -188,12 +191,16 @@ def main():
 
         # Wait to run the next assay plate (Assay plate took ~36 min to create and T0 read but T12 reading only takes ~9min )
         if i != num_assay_plates - 1:
-            time.sleep(1620)
+
+            # Print information about incubation time
             start_time = datetime.now()
             end_time = start_time + timedelta(seconds=1620)
             print(f"starting sleep at {start_time.strftime('%I:%M:%S %p')}")
             print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
             print("Now sleeping for 1620 seconds")
+
+            # Sleep to incubate until next assay plate is ready
+            time.sleep(1620)
 
         # TODO: Globus things again
 

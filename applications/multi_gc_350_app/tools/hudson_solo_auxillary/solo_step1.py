@@ -46,7 +46,6 @@ def generate_hso_file(
         # TODO: how to handle this?
         raise error_msg
 
-
 # * Other program variables
     blowoff_volume = 10
     num_mixes = 3
@@ -85,7 +84,7 @@ def generate_hso_file(
 
     # * Fill all columns of empty 96 well plate (corning 3383 or Falcon - ref 353916) with fresh lb media (12 channel in Position 1, media_start_column and media_start_column+1)
     soloSoft.getTip(tip_box_position)
-    j = 1
+    # j = 1
     for i in range(1, 7):  # first half plate = media from column 1
         soloSoft.aspirate(
             position="Position7",

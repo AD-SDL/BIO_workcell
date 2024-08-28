@@ -41,6 +41,7 @@ def generate_hso_file(
             current_assay_plate_num - 1
         ]
         tip_box_position = f"Position{payload['tip_box_position']}"
+
     except Exception as error_msg:
         # TODO: how to handle this?
         raise error_msg

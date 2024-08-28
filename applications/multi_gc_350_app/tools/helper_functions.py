@@ -53,14 +53,6 @@ def parse_run_details_csv(run_details_csv_path: str):
     except Exception as e:
         raise e
 
-    print(num_assay_plates)
-    print(incubation_hours)
-    print(treatment_stock_column)
-    print(culture_stock_column)
-    print(culture_dilution_column)
-    print(media_stock_start_column)
-    print(treatment_dilution_half)
-
     return (
         num_assay_plates,
         incubation_hours,
@@ -70,3 +62,5 @@ def parse_run_details_csv(run_details_csv_path: str):
         media_stock_start_column,
         treatment_dilution_half,
     )
+
+
