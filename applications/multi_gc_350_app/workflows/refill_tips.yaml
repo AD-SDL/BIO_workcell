@@ -1,10 +1,10 @@
-name: Refill Tips WF 
+name: Growth Curve (Refill Tips) - Workflow
 
 metadata:
-  author: Casey Stone, Abraham Stroka 
-  info: Workflow to refill tips 
+  author: Casey Stone, Abraham Stroka
+  info: Workflow to refill tips
   version: 0.1
- 
+
 flowdef:
   - name: Refill Tips
     module: solo

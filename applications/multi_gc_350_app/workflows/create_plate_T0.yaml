@@ -1,4 +1,4 @@
-name: Growth Curve - Workflow
+name: Growth Curve (T0) - Workflow
 
 metadata:
   author: Casey Stone, Abraham Stroka
@@ -12,19 +12,19 @@ flowdef:
     args:
       source: "Stack1"
       target: "Solo.Position2"
-      plate_type: "flat_bottom_96well" 
+      plate_type: "flat_bottom_96well"
     checks: null
     comment: Place plate in Solo Position2
 
-  - name: Remove lid    
+  - name: Remove lid
     module: platecrane
     action: remove_lid
     args:
       source: "Solo.Position2"
-      target: "LidNest1"
+      target: "Stack4"
       plate_type: "flat_bottom_96well"
     comment: Place plate lid on lid nest 2
-  
+
   - name: Move platecrane to Safe location
     module: platecrane
     action: move_safe
@@ -37,10 +37,8 @@ flowdef:
   - name: Mix Reactions
     module: solo
     action: run_protocol
-    args:
-      hso_contents: payload.hso_1
-      hso_num_lines: payload.hso_1_lines
-      hso_basename: payload.hso_1_basename
+    files:
+      protocol_file: payload.hso_1_path
     checks: RESOURCE_CHECK
     comment: resource check not implemented, but will be
 
@@ -48,10 +46,8 @@ flowdef:
   - name: Mix Reactions
     module: solo
     action: run_protocol
-    args:
-      hso_contents: payload.hso_2
-      hso_num_lines: payload.hso_2_lines
-      hso_basename: payload.hso_2_basename
+    files:
+      protocol_file: payload.hso_2_path
     checks: RESOURCE_CHECK
     comment: resource check not implemented, but will be
 
@@ -59,27 +55,25 @@ flowdef:
   - name: Mix Reactions
     module: solo
     action: run_protocol
-    args:
-      hso_contents: payload.hso_3
-      hso_num_lines: payload.hso_3_lines
-      hso_basename: payload.hso_3_basename
+    files:
+      protocol_file: payload.hso_3_path
     checks: RESOURCE_CHECK
     comment: resource check not implemented, but will be
 
   - name: Open Hidex
     module: hidex
     action: open
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Open Hidex Gate
 
-- name: Move plate from Solo Position2 to Hidex Nest
+  - name: Move plate from Solo Position2 to Hidex Nest
     module: platecrane
     action: transfer
     args:
       source: "Solo.Position2"
-      target: "Hidex.Nest"      
+      target: "Hidex.Nest"
       plate_type: "flat_bottom_96well"
       height_offset: 8
     checks: null
@@ -88,15 +82,17 @@ flowdef:
   - name: run Hidex
     module: hidex
     action: run_assay
-    args: 
+    args:
       assay_name: "Campaign2_wei_cs"
+    data_labels:
+      assay_result: T0_result
     checks: null
     comment: Run protocol at hidex
 
   - name: Open Hidex
     module: hidex
     action: open
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Open Hidex Gate
@@ -115,7 +111,7 @@ flowdef:
   - name: Close Hidex
     module: hidex
     action: close
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Close Hidex Gate
@@ -142,15 +138,18 @@ flowdef:
   - name: Load Liconic
     module: liconic
     action: load_plate
-    args: 
-      plate_id: payload.current_assay_plate_num
+    args:
+      plate_id: payload.plate_id
+      stacker: null
+      slot: null
     checks: null
     comment: Load assay plate into Liconic
 
-  - name: Start shaker at set speed
-    module: liconic
-    action: begin_shake
-    args: 
-      shaker_speed: payload.shaker_speed
-    checks: null
-    comment: Shake the assay plate in Liconic
+  # DO NOT SHAKE UNTIL THE SHAKER IS INSTALLED
+  # - name: Start shaker at set speed
+  #   module: liconic
+  #   action: begin_shake
+  #   args:
+  #     shaker_speed: payload.shaker_speed
+  #   checks: null
+  #   comment: Shake the assay plate in Liconic

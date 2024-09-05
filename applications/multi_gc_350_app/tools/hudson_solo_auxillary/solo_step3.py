@@ -1,18 +1,17 @@
-import os
-import sys
-import time
-import argparse
-from liquidhandling import SoloSoft
-from liquidhandling import Reservoir_12col_Agilent_201256_100_BATSgroup, Plate_96_Corning_3635_ClearUVAssay, DeepBlock_96VWR_75870_792_sterile
+from liquidhandling import (
+    Plate_96_Corning_3635_ClearUVAssay,
+    Reservoir_12col_Agilent_201256_100_BATSgroup,
+    SoloSoft,
+)
 
 
 def generate_hso_file(
-        payload, 
-        temp_file_path,
-): 
+    payload,
+    temp_file_path,
+):
     """generate_hso_file
 
-    Description: 
+    Description:
         Generates SOLOSoft .hso file for step 3 of the growth curve workflow
 
         Step 3 of the growth curve protocol includes:
@@ -20,22 +19,33 @@ def generate_hso_file(
 
     Args:
         payload (dict): input variables from the wei workflow
-        temp_file_path (str): file path to temporarily save hso file to 
+        temp_file_path (str): file path to temporarily save hso file to
     """
-    
+
     # extract payload variables
-    try: 
-        current_assay_plate_num = payload['current_assay_plate_num']
-        treatment_stock_column = payload['treatment_stock_column'][current_assay_plate_num - 1]
-        culture_stock_column = payload['culture_stock_column'][current_assay_plate_num - 1]
-        culture_dilution_column = payload['culture_dilution_column'][current_assay_plate_num - 1]
-        media_stock_start_column = payload['media_stock_start_column'][current_assay_plate_num - 1]
-        treatment_dilution_half = payload['treatment_dilution_half'][current_assay_plate_num - 1]
+    try:
+        current_assay_plate_num = payload["current_assay_plate_num"]
+        treatment_stock_column = payload["treatment_stock_column"][
+            current_assay_plate_num - 1
+        ]
+        culture_stock_column = payload["culture_stock_column"][
+            current_assay_plate_num - 1
+        ]
+        culture_dilution_column = payload["culture_dilution_column"][
+            current_assay_plate_num - 1
+        ]
+        media_stock_start_column = payload["media_stock_start_column"][
+            current_assay_plate_num - 1
+        ]
+        treatment_dilution_half = payload["treatment_dilution_half"][
+            current_assay_plate_num - 1
+        ]
         tip_box_position = f"Position{payload['tip_box_position']}"
-    except Exception as error_msg: 
+
+    except Exception as error_msg:
         # TODO: how to handle this?
         raise error_msg
-    
+
     # other protocol variables
     blowoff_volume = 10
     num_mixes = 3
@@ -66,7 +76,7 @@ def generate_hso_file(
         ],
     )
 
-    soloSoft.getTip(tip_box_position)  
+    soloSoft.getTip(tip_box_position)
     for i in range(6, 0, -1):  # first half of plate
         # if i == 3:  # switch tips half way through to reduce error  # tested and ok to remove
         #     soloSoft.getTip(tip_box_location)
@@ -98,7 +108,7 @@ def generate_hso_file(
         # if i == 3:  # switch tips half way through to reduce error  # tested and ok to remove
         #     soloSoft.getTip(tip_box_position)
         soloSoft.aspirate(
-            position="Position6",
+            position="Position3",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
                 (6 * (treatment_dilution_half - 1)) + i, antibiotic_transfer_volume_s3
             ),

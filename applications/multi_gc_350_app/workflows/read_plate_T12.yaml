@@ -1,4 +1,4 @@
-name: Growth Curve - Workflow
+name: Growth Curve (T12) - Workflow
 
 metadata:
   author: Casey Stone, Abraham Stroka
@@ -9,11 +9,13 @@ flowdef:
   - name: Unload Liconic
     module: liconic
     action: unload_plate
-    args: 
-      plate_id: payload.current_assay_plate_num
+    args:
+      plate_id: payload.plate_id
+      stacker: null
+      slot: null
     checks: null
     comment: Stage pcr plates
-      
+
   - name: Move plate from Liconic to Peeler
     module: platecrane
     action: transfer
@@ -23,7 +25,7 @@ flowdef:
       plate_type: "flat_bottom_96well"
     checks: null
     comment: Place plate onto PeelerNest
-  
+
   - name: Peel
     module: peeler
     action: peel
@@ -31,43 +33,55 @@ flowdef:
       test: null
     checks: null
     comment: null
-    
-  - name: Open Hidex
-    module: hidex
-    action: open
-    args: 
-      foo: "bar"
-    checks: null
-    comment: Open Hidex Gate
 
-  - name: Move plate from Peeler.Nest to Hidex.Nest
+  - name: Move plate from Peeler.Nest to Solo Position 2
     module: platecrane
     action: transfer
     args:
       source: "Peeler.Nest"
-      target: "Hidex.Nest"
+      target: "Solo.Position2"
       plate_type: "flat_bottom_96well"
-      height_offset: 8
-    checks: nullpayload.stacker
+    checks: Transfer assay plate from Peeler to Hidex
     comment: Place plate in Hidex Nest
-
-  - name: run Hidex
-    module: hidex
-    action: run_assay
-    args: 
-      assay_name: "Campaign2_wei_cs"
-    checks: null  
-    comment: Run protocol Hidex 
 
   - name: Open Hidex
     module: hidex
     action: open
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Open Hidex Gate
 
-  - name: Move plate from HidexNest to Stack1
+  - name: Move plate from Solo Position2 to Hidex Nest
+    module: platecrane
+    action: transfer
+    args:
+      source: "Solo.Position2"
+      target: "Hidex.Nest"
+      plate_type: "flat_bottom_96well"
+      height_offset: 8
+    checks: null
+    comment: Place plate to Hidex Nest
+
+  - name: run Hidex
+    module: hidex
+    action: run_assay
+    args:
+      assay_name: "Campaign2_wei_cs"
+    data_labels:
+      assay_result: T12_result
+    checks: null
+    comment: Run protocol at hidex
+
+  - name: Open Hidex
+    module: hidex
+    action: open
+    args:
+      foo: "bar"
+    checks: null
+    comment: Open Hidex Gate
+
+  - name: Move plate from HidexNest to Stack5
     module: platecrane
     action: transfer
     args:
@@ -81,8 +95,7 @@ flowdef:
   - name: Close Hidex
     module: hidex
     action: close
-    args: 
+    args:
       foo: "bar"
     checks: null
     comment: Close Hidex Gate
-     
