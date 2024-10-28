@@ -1,11 +1,8 @@
 #!/usr/bin/env python3
 
-import time
-from datetime import datetime, timedelta
 from pathlib import Path
 
 import wei
-
 #from tools.gladier_flow.growth_curve_gladier_flow import c2_flow
 from tools.helper_functions import parse_run_details_csv
 from tools.hudson_solo_auxillary import solo_step1, solo_step2, solo_step3
@@ -15,7 +12,7 @@ from tools.hudson_solo_auxillary.hso_functions import package_hso
 def main():
     # Directory paths
     bio_workcell_path = Path(__file__).parent.parent.parent
-    app_dir = bio_workcell_path / "applications" / "multi_gc_350_app"
+    app_dir = bio_workcell_path / "applications" / "gc_demo_app"
     wf_dir = app_dir / "workflows"
 
     # Workflow paths
@@ -57,13 +54,13 @@ def main():
     payload["media_stock_start_column"] = run_details[5]
     payload["treatment_dilution_half"] = run_details[6]
 
-    # Run Workcell Setup Workflow (preheat the hidex to 37C)
-    exp.start_run(
-        workflow_file=wc_setup_wf_path,
-        payload=payload,
-        blocking=False,
-        simulate=False,
-    )
+    # # Run Workcell Setup Workflow (preheat the hidex to 37C)
+    # exp.start_run(
+    #     workflow_file=wc_setup_wf_path,
+    #     payload=payload,
+    #     blocking=False,
+    #     simulate=False,
+    # )
 
     # Loop to create assay plates
     for i in range(num_assay_plates):
@@ -98,8 +95,8 @@ def main():
         payload["hso_3_path"] = hso_3_path
 
 
-        # Refill the tips (software step) before every two assay plates
-        if (i % 2) == 0:
+        # Refill the tips only at very beginning of demo
+        if i == 0:
             exp.start_run(
                 workflow_file=refill_tips_wf_path,
                 payload=payload,
@@ -116,10 +113,10 @@ def main():
         )
 
         # Collect and save the Hidex data from the T0 reading
-        output_dir = Path.home() / "runs" / run_info.experiment_id
-        output_dir.mkdir(parents=True, exist_ok=True)
-        datapoint_id = run_info.get_datapoint_id_by_label("T0_result")
-        exp.save_datapoint_value(datapoint_id, output_dir / f"T0_result_{payload['plate_id']}.xlsx")
+        # output_dir = Path.home() / "runs" / run_info.experiment_id
+        # output_dir.mkdir(parents=True, exist_ok=True)
+        # datapoint_id = run_info.get_datapoint_id_by_label("T0_result")
+        # exp.save_datapoint_value(datapoint_id, output_dir / f"T0_result_{payload['plate_id']}.xlsx")
 
         # TODO: fix the globus stuff
         # flow_title = Path(output_file_path)
@@ -151,19 +148,19 @@ def main():
         # )
 
     # Calculate total incubation time and sleep to allow for incubation
-    incubation_seconds = incubation_hours * 3600
-    start_time = datetime.now()
-    end_time = start_time + timedelta(seconds=incubation_seconds - (2160 * (num_assay_plates -1)))
+    # incubation_seconds = incubation_hours * 3600
+    # start_time = datetime.now()
+    # end_time = start_time + timedelta(seconds=incubation_seconds - (2160 * (num_assay_plates -1)))
 
-    # TESTING
-    print(f"incubation_hours: {incubation_hours}")
-    print(f"incubation_seconds: {incubation_seconds}")
-    print(f"starting sleep at {start_time.strftime('%I:%M:%S %p')}")
-    print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
-    print(f"Now sleeping for {incubation_seconds - (2159 * (num_assay_plates -1))} seconds")
+    # # TESTING
+    # print(f"incubation_hours: {incubation_hours}")
+    # print(f"incubation_seconds: {incubation_seconds}")
+    # print(f"starting sleep at {start_time.strftime('%I:%M:%S %p')}")
+    # print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
+    # print(f"Now sleeping for {incubation_seconds - (2159 * (num_assay_plates -1))} seconds")
 
     # Sleep for the total incubation time
-    time.sleep(incubation_seconds - (2160 * (num_assay_plates -1)))  # 12 hours = 43200 seconds, T0 half takes ~36 min to run (2160 seconds)
+    #time.sleep(incubation_seconds - (2160 * (num_assay_plates -1)))  # 12 hours = 43200 seconds, T0 half takes ~36 min to run (2160 seconds)
 
     # Loop to read assay plates
     for i in range(num_assay_plates):
@@ -183,24 +180,24 @@ def main():
             simulate=False,
         )
 
-        # Collect and save the Hidex data from the T0 reading
-        output_dir = Path.home() / "runs" / run_info.experiment_id
-        output_dir.mkdir(parents=True, exist_ok=True)
-        datapoint_id = run_info.get_datapoint_id_by_label("T12_result")
-        exp.save_datapoint_value(datapoint_id, output_dir / f"T12_result_{payload['plate_id']}.xlsx")
+        # # Collect and save the Hidex data from the T0 reading
+        # output_dir = Path.home() / "runs" / run_info.experiment_id
+        # output_dir.mkdir(parents=True, exist_ok=True)
+        # datapoint_id = run_info.get_datapoint_id_by_label("T12_result")
+        # exp.save_datapoint_value(datapoint_id, output_dir / f"T12_result_{payload['plate_id']}.xlsx")
 
-        # Wait to run the next assay plate (Assay plate took ~36 min to create and T0 read but T12 reading only takes ~9min )
-        if i != num_assay_plates - 1:
+        # # Wait to run the next assay plate (Assay plate took ~36 min to create and T0 read but T12 reading only takes ~9min )
+        # if i != num_assay_plates - 1:
 
-            # Print information about incubation time
-            start_time = datetime.now()
-            end_time = start_time + timedelta(seconds=1620)
-            print(f"starting sleep at {start_time.strftime('%I:%M:%S %p')}")
-            print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
-            print("Now sleeping for 1620 seconds")
+        #     # Print information about incubation time
+        #     start_time = datetime.now()
+        #     end_time = start_time + timedelta(seconds=1620)
+        #     print(f"starting sleep at {start_time.strftime('%I:%M:%S %p')}")
+        #     print(f"ending sleep at {end_time.strftime('%I:%M:%S %p')}")
+        #     print("Now sleeping for 1620 seconds")
 
-            # Sleep to incubate until next assay plate is ready
-            time.sleep(1620)
+        #     # Sleep to incubate until next assay plate is ready
+        #     time.sleep(1620)
 
         # TODO: Globus things again
 
