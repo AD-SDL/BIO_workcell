@@ -1,15 +1,25 @@
 #!/usr/bin/env python3
 
-import time
 from datetime import datetime, timedelta
 from pathlib import Path
+import time
 
-import wei
+# import wei   # OLD VERSION
+from wei import ExperimentClient
+from wei.types.experiment_types import CampaignDesign, ExperimentDesign
 
 #from tools.gladier_flow.growth_curve_gladier_flow import c2_flow
 from tools.helper_functions import parse_run_details_csv
 from tools.hudson_solo_auxillary import solo_step1, solo_step2, solo_step3
 from tools.hudson_solo_auxillary.hso_functions import package_hso
+
+"""
+If you get an error saying 'no module wei',
+you need to source the .venv.
+
+use:
+source .venv/bin/activate
+"""
 
 
 def main():
@@ -29,11 +39,21 @@ def main():
     run_details_csv_path = app_dir / "run_details_mini.csv"  # TESTING
 
     # Creates a WEI Experiment at the 8000 port and registers the experiment
-    exp = wei.ExperimentClient(
+    experiment_design = ExperimentDesign(
+        experiment_name="MULTI_GC_350",
+        experiment_description="Experiment application for the growth curve experiment",
+    )
+
+    campaign = CampaignDesign(
+        campaign_name="AMP_Campaign",
+        campaign_description="Campaign to collect experiments related to the AMP LDRD",
+    )
+    # define the experiment client object that will communicate with the WEI server
+    experiment_client = ExperimentClient(
         server_host="localhost",
         server_port="8000",
-        experiment_name="Multi_GC_350",
-        description="Growth Curve assay producing multiple assay plates on BIO350 workcell",
+        experiment=experiment_design,
+        campaign=campaign,
     )
 
     num_assay_plates = None
@@ -58,8 +78,8 @@ def main():
     payload["treatment_dilution_half"] = run_details[6]
 
     # Run Workcell Setup Workflow (preheat the hidex to 37C)
-    exp.start_run(
-        workflow_file=wc_setup_wf_path,
+    experiment_client.start_run(
+        workflow=wc_setup_wf_path,
         payload=payload,
         blocking=False,
         simulate=False,
@@ -72,8 +92,6 @@ def main():
 
         print(f"Current assay plate number: {payload['current_assay_plate_num']}")
         print(f"Plate ID: {payload['plate_id']}")
-
-        # exp.events.log_local_compute("package_hso")  # TODO: Do I need to do this? What is the correct line for this now?
 
         # Generate the temp hso files
         hso_1_path = package_hso(
@@ -100,16 +118,16 @@ def main():
 
         # Refill the tips (software step) before every two assay plates
         if (i % 2) == 0:
-            exp.start_run(
-                workflow_file=refill_tips_wf_path,
+            experiment_client.start_run(
+                workflow=refill_tips_wf_path,
                 payload=payload,
                 # blocking=True,
                 simulate=False,
             )
 
-        # Run the T0 workflow
-        run_info = exp.start_run(
-            workflow_file=T0_wf_path,
+        # Run the T0 workflow  # TODO: does this method of collecting files still work?
+        run_info = experiment_client.start_run(
+            workflow=T0_wf_path,
             payload=payload,
             blocking=True,
             simulate=False,
@@ -119,36 +137,7 @@ def main():
         output_dir = Path.home() / "runs" / run_info.experiment_id
         output_dir.mkdir(parents=True, exist_ok=True)
         datapoint_id = run_info.get_datapoint_id_by_label("T0_result")
-        exp.save_datapoint_value(datapoint_id, output_dir / f"T0_result_{payload['plate_id']}.xlsx")
-
-        # TODO: fix the globus stuff
-        # flow_title = Path(output_file_path)
-        # fname = flow_title.name
-
-
-        # THIS IS FROM AN OLD WORKING VERISON FOR REFERENCE
-        # Formatting the File Path from Windows to be compatible with Linux file directory settings and creating a Path
-        # hidex_file_path = hidex_file_path.replace('\\', '/')
-        # hidex_file_path = hidex_file_path.replace("C:/", "/C/")
-        # flow_title = Path(hidex_file_path) #Path(run_info["hist"]["run_assay"]["step_response"])
-        # Accessing the File Name
-        # fname = flow_title.name
-        # print("FILE NAME")
-        # print(fname)
-        # # Accessing the File Path
-        # flow_title = flow_title.parents[0]
-        # print("FILE PATH")
-        # print(flow_title)
-
-        # Uploading the Hidex Data to the Globus client and portal. The arguments in the function are the strings of the experiment name (exp_name), plate number (plate_n), time uploaded (time), the flow_title (local_path), and file name (fname), and the WEI Experiment Object).
-        # c2_flow(
-        #     exp_name="T0_Reading",
-        #     plate_n="1",
-        #     time=str(time.strftime("%H_%M_%S", time.localtime())),
-        #     local_path=flow_title,
-        #     fname=fname,
-        #     exp=exp,
-        # )
+        experiment_client.save_datapoint_value(datapoint_id, output_dir / f"T0_result_{payload['plate_id']}.xlsx")
 
     # Calculate total incubation time and sleep to allow for incubation
     incubation_seconds = incubation_hours * 3600
@@ -176,8 +165,8 @@ def main():
         print(f"Plate ID: {payload['plate_id']}")
 
         # Run the T12 workflow
-        run_info = exp.start_run(
-            workflow_file=T12_wf_path,
+        run_info = experiment_client.start_run(
+            workflow=T12_wf_path,
             payload=payload,
             blocking=True,
             simulate=False,
@@ -187,7 +176,7 @@ def main():
         output_dir = Path.home() / "runs" / run_info.experiment_id
         output_dir.mkdir(parents=True, exist_ok=True)
         datapoint_id = run_info.get_datapoint_id_by_label("T12_result")
-        exp.save_datapoint_value(datapoint_id, output_dir / f"T12_result_{payload['plate_id']}.xlsx")
+        experiment_client.save_datapoint_value(datapoint_id, output_dir / f"T12_result_{payload['plate_id']}.xlsx")
 
         # Wait to run the next assay plate (Assay plate took ~36 min to create and T0 read but T12 reading only takes ~9min )
         if i != num_assay_plates - 1:
@@ -201,8 +190,6 @@ def main():
 
             # Sleep to incubate until next assay plate is ready
             time.sleep(1620)
-
-        # TODO: Globus things again
 
 
 if __name__ == "__main__":

@@ -143,7 +143,6 @@ def generate_hso_file(
 
     # * Transfer treatment into first column of treatment dilution plate (will make 1:2 dilution)
     for i in range(2):
-        # CHANGED TO FLAT BOTTOM FOR BECCA'S 4 PLATE TEST
         soloSoft.aspirate(
             position="Position4",
             aspirate_volumes=Reservoir_12col_Agilent_201256_100_BATSgroup().setColumn(
