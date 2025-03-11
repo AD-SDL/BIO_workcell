@@ -152,9 +152,7 @@ def main():
     print(f"Now sleeping for {incubation_seconds - (2159 * (num_assay_plates -1))} seconds")
 
     # Sleep for the total incubation time
-    time.sleep(incubation_seconds - (2160 * (num_assay_plates)))  # T0 portion takes ~36 min to run (2160 seconds)
-    # was this..
-    # time.sleep(incubation_seconds - (2160 * (num_assay_plates -1)))
+    time.sleep(incubation_seconds - (2160 * (num_assay_plates - 1)))  # T0 portion takes ~36 min to run (2160 seconds)
 
     # Loop to read assay plates
     for i in range(num_assay_plates):
