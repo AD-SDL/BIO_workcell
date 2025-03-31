@@ -34,13 +34,12 @@ flowdef:
     checks: null
     comment: null
 
-  # TODO: TEST THE NEW AFTER PEELER LOCATION!
   - name: Move plate from Peeler.Nest to Solo Position 2
     module: platecrane
     action: transfer
     args:
       source: "Peeler.Nest"
-      target: "Solo.Position2AfterPeeler"
+      target: "Solo.Position2"
       plate_type: "flat_bottom_96well"
     checks: Transfer assay plate from Peeler to Hidex
     comment: Place plate in Hidex Nest
