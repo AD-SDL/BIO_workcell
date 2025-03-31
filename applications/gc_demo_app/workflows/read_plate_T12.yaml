@@ -1,0 +1,110 @@
+name: Growth Curve (T12) - Workflow
+
+metadata:
+  author: Casey Stone, Abraham Stroka
+  info: read_plate_T12 Workflow for BIO350 multi growth_app application
+  version: 0.1
+
+flowdef:
+  - name: Unload Liconic
+    module: liconic
+    action: unload_plate
+    args:
+      plate_id: payload.plate_id
+      stacker: null
+      slot: null
+    checks: null
+    comment: Stage pcr plates
+
+  # - name: Move plate from Liconic to Peeler
+  #   module: platecrane
+  #   action: transfer
+  #   args:
+  #     source: "Liconic.Nest"
+  #     target: "Peeler.Nest"
+  #     plate_type: "flat_bottom_96well"
+  #   checks: null
+  #   comment: Place plate onto PeelerNest
+
+  # - name: Peel
+  #   module: peeler
+  #   action: peel
+  #   args:
+  #     test: null
+  #   checks: null
+  #   comment: null
+
+  # - name: Move plate from Peeler.Nest to Solo Position 2
+  #   module: platecrane
+  #   action: transfer
+  #   args:
+  #     source: "Peeler.Nest"
+  #     target: "Solo.Position2"
+  #     plate_type: "flat_bottom_96well"
+  #   checks: Transfer assay plate from Peeler to Hidex
+  #   comment: Place plate in Hidex Nest
+
+  # - name: Open Hidex
+  #   module: hidex
+  #   action: open
+  #   args:
+  #     foo: "bar"
+  #   checks: null
+  #   comment: Open Hidex Gate
+
+  # - name: Move plate from Solo Position2 to Hidex Nest
+  #   module: platecrane
+  #   action: transfer
+  #   args:
+  #     source: "Solo.Position2"
+  #     target: "Hidex.Nest"
+  #     plate_type: "flat_bottom_96well"
+  #     height_offset: 8
+  #   checks: null
+  #   comment: Place plate to Hidex Nest
+
+  # - name: run Hidex
+  #   module: hidex
+  #   action: run_assay
+  #   args:
+  #     assay_name: "Campaign2_wei_cs"
+  #   data_labels:
+  #     assay_result: T12_result
+  #   checks: null
+  #   comment: Run protocol at hidex
+
+  # - name: Open Hidex
+  #   module: hidex
+  #   action: open
+  #   args:
+  #     foo: "bar"
+  #   checks: null
+  #   comment: Open Hidex Gate
+
+  # - name: Move plate from Peeler.Nest to Stack5
+  #   module: platecrane
+  #   action: transfer
+  #   args:
+  #     source: "Peeler.Nest"
+  #     target: "Stack5"
+  #     plate_type: "flat_bottom_96well"
+  #   checks: null
+  #   comment: Place plate into trash Stack
+
+  - name: Move plate from Liconic.Nest to Stack5
+    module: platecrane
+    action: transfer
+    args:
+      source: "Liconic.Nest"
+      target: "Stack5"
+      plate_type: "flat_bottom_96well"
+    checks: null
+    comment: Place plate into trash Stack
+
+  # - name: Close Hidex
+  #   module: hidex
+  #   action: close
+  #   args:
+  #     foo: "bar"
+  #   checks: null
+  #   comment: Close Hidex Gate
